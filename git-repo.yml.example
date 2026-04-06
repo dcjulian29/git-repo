@@ -1,0 +1,14 @@
+# git-repo configuration file
+# Copy to ~/.config/git-repo.yml and edit as needed, or use the CLI:
+#
+#   git-repo config directory ~/src
+#   git-repo config add my-project https://github.com/example/my-project.git
+#
+
+directory: ~/src
+
+repositories:
+  - name: my-project
+    url: https://github.com/example/my-project.git
+  - name: another-repo
+    url: git@github.com:example/another-repo.git
