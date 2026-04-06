@@ -1,0 +1,70 @@
+---
+version: 2
+before:
+  hooks:
+    - go mod tidy
+    - go vet
+builds:
+  - env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - windows
+      - darwin
+    goarch:
+      - amd64
+    ldflags:
+      - -s -w
+      - -X go.szostok.io/version.version={{.Version}}
+      - -X go.szostok.io/version.buildDate={{.Date}}
+archives:
+  - files:
+      - LICENSE
+    builds_info:
+      group: root
+      owner: root
+      mode: 0755
+    name_template: "dcjulian29.apps.git-repo_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+    format_overrides:
+      - formats: [ 'zip' ]
+        goos: windows
+nfpms:
+  - package_name: dcjulian29.apps.git-repo
+    homepage: https://github.com/dcjulian29/git-repo/
+    maintainer: Julian Easterling <julian@julianscorner.com>
+    license: Apache 2.0
+    dependencies:
+      - docker-ce
+      - docker-ce-cli
+      - containerd.io
+    description: |-
+      git-repo is a CLI binary that combines multiple repository git workflows.
+    formats:
+      - deb
+      - rpm
+    bindir: /usr/local/bin
+chocolateys:
+  - name: dcjulian29.apps.git-repo
+    authors: Julian Easterling <julian@julianscorner.com>
+    project_url: https://github.com/dcjulian29/git-repo/
+    copyright: 2023 Julian Easterling julian@julianscorner.com
+    license_url: https://github.com/dcjulian29/git-repo/blob/main/LICENSE
+    require_license_acceptance: false
+    bug_tracker_url: https://github.com/dcjulian29/git-repo/issues
+    description: |
+      git-repo is a CLI binary that combines multiple repository git workflows.
+    dependencies:
+      - id: git
+    api_key: "{{ .Env.CHOCO_API_KEY}}"
+    source_repo: "https://www.myget.org/F/dcjulian29-chocolatey/"
+    skip_publish: false
+checksum:
+  name_template: 'checksums.txt'
+snapshot:
+  version_template: "{{ incpatch .Version }}-next"
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - '^docs:'
+      - '^test:'
