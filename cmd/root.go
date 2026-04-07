@@ -25,6 +25,7 @@ import (
 
 	"github.com/dcjulian29/git-repo/cmd/config"
 	"github.com/dcjulian29/git-repo/cmd/initialize"
+	"github.com/dcjulian29/git-repo/cmd/synchronize"
 	"github.com/dcjulian29/go-toolbox/textformat"
 	"github.com/spf13/cobra"
 	"go.szostok.io/version/extension"
@@ -58,4 +59,5 @@ func Execute() {
 func init() {
 	rootCmd.AddCommand(config.NewCommand())
 	rootCmd.AddCommand(initialize.NewCommand())
+	rootCmd.AddCommand(synchronize.NewCommand())
 }
