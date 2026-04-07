@@ -14,6 +14,8 @@ git-repo is a CLI binary that combines multiple repository git workflows, built 
 | `git-repo config remove <name>` | Remove a repository from the config |
 | `git-repo config list` | List all configured repositories |
 | `git-repo init` | Clone missing repos defined in config; skip those that exist |
+| `git-repo status` | Colour-coded table: dirty / push / pull / diverged / untracked |
+| `git-repo sync` | Fetch → pull (rebase + prune + submodules) → push |
 
 ## Configuration
 
@@ -48,4 +50,19 @@ go build          # → bin/git-repo
 git-repo config directory ~/src
 git-repo config add my-lib https://github.com/example/my-lib.git
 git-repo init
+
+# 4. Daily use
+git-repo status
+git-repo sync
+```
+
+## Status flags
+
+```
+--actions     Show only repos that require any action
+--dirty       Show only repos with uncommitted changes
+--push        Show only repos that need a push
+--pull        Show only repos that need a pull
+--diverged    Show only repos that have diverged from remote
+--untracked   Show only repos with untracked files
 ```
