@@ -1,5 +1,6 @@
 ---
-name: Code Quality
+name: CodeQL Analysis
+
 'on':
   push:
     branches: [ "main" ]

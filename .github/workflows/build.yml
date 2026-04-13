@@ -1,5 +1,6 @@
 ---
 name: Build
+
 'on':
   push:
     paths:
@@ -29,7 +30,7 @@ jobs:
 
       - uses: goreleaser/goreleaser-action@v7
         with:
-          args: build --snapshot --clean
+          args: build --snapshot
           distribution: goreleaser
           version: '~> v2'
 

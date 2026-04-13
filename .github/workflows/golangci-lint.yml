@@ -1,5 +1,6 @@
 ---
 name: Lint
+
 'on':
   push:
     paths:
@@ -8,9 +9,6 @@ name: Lint
       - "**.go"
       - ".golangci.yml"
   pull_request:
-
-permissions:
-  contents: read
 
 jobs:
   lint:
