@@ -29,20 +29,30 @@ archives:
       - formats: [ 'zip' ]
         goos: windows
 nfpms:
-  - package_name: dcjulian29.apps.git-repo
+  - id: packages
+    package_name: dcjulian29.apps.git-repo
+    vendor: Julian Easterling
     homepage: https://github.com/dcjulian29/git-repo/
     maintainer: Julian Easterling <julian@julianscorner.com>
     license: Apache 2.0
     dependencies:
-      - docker-ce
-      - docker-ce-cli
-      - containerd.io
+      - git
     description: |-
       git-repo is a CLI binary that combines multiple repository git workflows.
     formats:
       - deb
       - rpm
     bindir: /usr/local/bin
+publishers:
+  - name: fury.io
+    ids:
+      - packages
+    dir: "{{ dir .ArtifactPath }}"
+    cmd: >-
+      curl -sf
+      -F package=@{{ .ArtifactName }}
+      https://{{ .Env.FURY_TOKEN }}@push.fury.io/{{ .Env.FURY_ACCOUNT }}/
+    disable: "{{ if or .IsNightly .IsSnapshot }}true{{ end }}"
 chocolateys:
   - name: dcjulian29.apps.git-repo
     authors: Julian Easterling <julian@julianscorner.com>
@@ -56,7 +66,7 @@ chocolateys:
     dependencies:
       - id: git
     api_key: "{{ .Env.CHOCO_API_KEY}}"
-    source_repo: "https://www.myget.org/F/dcjulian29-chocolatey/"
+    source_repo: "{{ .Env.CHOCO_URL }}/"
     skip_publish: false
 checksum:
   name_template: 'checksums.txt'
@@ -66,5 +76,7 @@ changelog:
   sort: asc
   filters:
     exclude:
+      - '^Merge pull request'
+      - '^admin:'
       - '^docs:'
       - '^test:'

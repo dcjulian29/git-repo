@@ -45,8 +45,6 @@ jobs:
         with:
           fetch-depth: 0
 
-      - run: git fetch --force --tags
-
       - uses: actions/setup-go@v6
         with:
           cache-dependency-path: ${{ github.workspace }}/go.sum
@@ -58,5 +56,8 @@ jobs:
           distribution: goreleaser
           version: '~> v2'
         env:
+          FURY_ACCOUNT: ${{ vars.FURY_ACCOUNT }}
+          FURY_TOKEN: ${{ secrets.FURY_TOKEN }}
           GITHUB_TOKEN: ${{ github.token }}
           CHOCO_API_KEY: ${{ secrets.CHOCO_API_KEY }}
+          CHOCO_URL: ${{ vars.CHOCO_URL }}
