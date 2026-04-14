@@ -20,7 +20,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/dcjulian29/git-repo/internal/shared"
+	"github.com/dcjulian29/git-repo/internal/config"
 	"github.com/dcjulian29/go-toolbox/textformat"
 	"github.com/fatih/color"
 	"github.com/olekukonko/tablewriter"
@@ -32,7 +32,7 @@ func listCmd() *cobra.Command {
 		Use:   "list",
 		Short: "List all configured repositories",
 		RunE: func(_ *cobra.Command, _ []string) error {
-			cfg, err := shared.GetSettings()
+			cfg, err := config.Load()
 			if err != nil {
 				return err
 			}
@@ -44,7 +44,7 @@ func listCmd() *cobra.Command {
 	return cmd
 }
 
-func showRepositories(cfg *shared.Config) error {
+func showRepositories(cfg *config.Configuration) error {
 	if len(cfg.Repositories) == 0 {
 		fmt.Println(textformat.Warn("No repositories are configured."))
 

@@ -23,6 +23,7 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/dcjulian29/git-repo/internal/config"
 	"github.com/dcjulian29/git-repo/internal/git"
 	"github.com/dcjulian29/git-repo/internal/shared"
 	"github.com/dcjulian29/go-toolbox/filesystem"
@@ -49,7 +50,7 @@ func NewCommand() *cobra.Command {
 			return nil
 		},
 		RunE: func(_ *cobra.Command, _ []string) error {
-			cfg, err := shared.GetSettings()
+			cfg, err := config.Load()
 			if err != nil {
 				return err
 			}

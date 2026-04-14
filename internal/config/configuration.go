@@ -16,30 +16,13 @@ limitations under the License.
 
 package config
 
-import (
-	"fmt"
+// Configuration is the top-level structure that contains all of the configuration
+// for this program to manage repositories, templates, and workflows.
+type Configuration struct {
+	// Directory is the root directory that contains (or will contain) all
+	// managed repositories.
+	Directory string `yaml:"directory"`
 
-	"github.com/dcjulian29/git-repo/internal/config"
-	"github.com/fatih/color"
-	"github.com/spf13/cobra"
-)
-
-func showCmd() *cobra.Command {
-	cmd := &cobra.Command{
-		Use:   "show",
-		Short: "Print the current configuration",
-		RunE: func(_ *cobra.Command, _ []string) error {
-			cfg, err := config.Load()
-			if err != nil {
-				return err
-			}
-
-			fmt.Println("Directory: ", color.YellowString(cfg.Directory))
-			fmt.Println("\nRepositories:")
-
-			return showRepositories(&cfg)
-		},
-	}
-
-	return cmd
+	// Repositories is the list of repositories that are managed by this tool.
+	Repositories []Repository `yaml:"repositories"`
 }

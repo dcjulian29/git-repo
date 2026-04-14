@@ -23,6 +23,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/dcjulian29/git-repo/internal/config"
 	"github.com/dcjulian29/git-repo/internal/git"
 	"github.com/dcjulian29/git-repo/internal/shared"
 	"github.com/dcjulian29/go-toolbox/filesystem"
@@ -50,7 +51,7 @@ func NewCommand() *cobra.Command {
 			return nil
 		},
 		RunE: func(_ *cobra.Command, _ []string) error {
-			cfg, err := shared.GetSettings()
+			cfg, err := config.Load()
 			if err != nil {
 				return err
 			}
@@ -75,7 +76,7 @@ func NewCommand() *cobra.Command {
 				return fmt.Errorf("failed to create destination directory %q: %w", baseDir, err)
 			}
 
-			var toClone []shared.Repository
+			var toClone []config.Repository
 
 			for _, repo := range cfg.Repositories {
 				target := baseDir

@@ -14,32 +14,5 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+// Package config provides common configuration types and helpers.
 package config
-
-import (
-	"fmt"
-
-	"github.com/dcjulian29/git-repo/internal/config"
-	"github.com/fatih/color"
-	"github.com/spf13/cobra"
-)
-
-func showCmd() *cobra.Command {
-	cmd := &cobra.Command{
-		Use:   "show",
-		Short: "Print the current configuration",
-		RunE: func(_ *cobra.Command, _ []string) error {
-			cfg, err := config.Load()
-			if err != nil {
-				return err
-			}
-
-			fmt.Println("Directory: ", color.YellowString(cfg.Directory))
-			fmt.Println("\nRepositories:")
-
-			return showRepositories(&cfg)
-		},
-	}
-
-	return cmd
-}

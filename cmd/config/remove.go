@@ -20,7 +20,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/dcjulian29/git-repo/internal/shared"
+	"github.com/dcjulian29/git-repo/internal/config"
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 )
@@ -52,13 +52,13 @@ func removeCmd() *cobra.Command {
 		RunE: func(_ *cobra.Command, args []string) error {
 			name := args[0]
 
-			cfg, err := shared.GetSettings()
+			cfg, err := config.Load()
 			if err != nil {
 				return err
 			}
 
 			original := len(cfg.Repositories)
-			var kept []shared.Repository
+			var kept []config.Repository
 
 			for _, r := range cfg.Repositories {
 				if !strings.EqualFold(r.Name, name) {
@@ -72,7 +72,7 @@ func removeCmd() *cobra.Command {
 
 			cfg.Repositories = kept
 
-			if err := shared.SaveSettings(&cfg); err != nil {
+			if err := config.Save(&cfg); err != nil {
 				return err
 			}
 

@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package shared
+package config
 
 // Repository represents a single Git repository entry in the configuration
 // file. Name is used as the local sub-directory name; URL is the remote that

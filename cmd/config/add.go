@@ -20,7 +20,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/dcjulian29/git-repo/internal/shared"
+	"github.com/dcjulian29/git-repo/internal/config"
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 )
@@ -51,7 +51,7 @@ func addCmd() *cobra.Command {
 		RunE: func(_ *cobra.Command, args []string) error {
 			name, url := args[0], args[1]
 
-			cfg, err := shared.GetSettings()
+			cfg, err := config.Load()
 			if err != nil {
 				return err
 			}
@@ -62,9 +62,9 @@ func addCmd() *cobra.Command {
 				}
 			}
 
-			cfg.Repositories = append(cfg.Repositories, shared.Repository{Name: name, URL: url})
+			cfg.Repositories = append(cfg.Repositories, config.Repository{Name: name, URL: url})
 
-			if err := shared.SaveSettings(&cfg); err != nil {
+			if err := config.Save(&cfg); err != nil {
 				return err
 			}
 

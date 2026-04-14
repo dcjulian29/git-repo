@@ -19,7 +19,7 @@ package config
 import (
 	"fmt"
 
-	"github.com/dcjulian29/git-repo/internal/shared"
+	"github.com/dcjulian29/git-repo/internal/config"
 	"github.com/dcjulian29/go-toolbox/textformat"
 	"github.com/spf13/cobra"
 )
@@ -49,14 +49,14 @@ func directoryCmd() *cobra.Command {
 			return nil
 		},
 		RunE: func(_ *cobra.Command, args []string) error {
-			cfg, err := shared.GetSettings()
+			cfg, err := config.Load()
 			if err != nil {
 				return err
 			}
 
 			cfg.Directory = args[0]
 
-			if err := shared.SaveSettings(&cfg); err != nil {
+			if err := config.Save(&cfg); err != nil {
 				return err
 			}
 

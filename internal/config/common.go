@@ -14,15 +14,20 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package shared
+// Package config provides common configuration types and helpers.
+package config
 
-// Config is the top-level structure that contains the root directory and
-// the repositories managed within that directory
-type Config struct {
-	// Directory is the root directory that contains (or will contain) all
-	// managed repositories.
-	Directory string `yaml:"directory"`
+import (
+	"sync"
+)
 
-	// Repositories is the list of repositories that are managed by this tool.
-	Repositories []Repository `yaml:"repositories"`
-}
+const (
+	globalConfigFile = "git-repo.yml"
+)
+
+var (
+	instance  *Configuration
+	loadError error
+	mutex     sync.RWMutex
+	once      sync.Once
+)
