@@ -51,7 +51,7 @@ publishers:
     cmd: >-
       curl -sf
       -F package=@{{ .ArtifactName }}
-      https://{{ .Env.FURY_TOKEN }}@push.fury.io/{{ .Env.FURY_ACCOUNT }}/
+      https://{{ .Env.FURY_TOKEN }}@push.fury.io/dcjulian29/
     disable: "{{ if or .IsNightly .IsSnapshot }}true{{ end }}"
 chocolateys:
   - name: dcjulian29.apps.git-repo
@@ -66,7 +66,7 @@ chocolateys:
     dependencies:
       - id: git
     api_key: "{{ .Env.CHOCO_API_KEY}}"
-    source_repo: "{{ .Env.CHOCO_URL }}/"
+    source_repo: "https://www.myget.org/F/dcjulian29-chocolatey/"
     skip_publish: false
 checksum:
   name_template: 'checksums.txt'
