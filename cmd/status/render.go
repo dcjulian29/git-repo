@@ -109,6 +109,7 @@ func render(results []git.RepoStatus) {
 				git.ActionLabel(s.PullNeeded, "pull needed", true),
 				git.ActionLabel(s.Diverged, "diverged", true),
 				git.ActionLabel(s.Untracked, "untracked files", false),
+				git.ActionLabel(s.NoUpstream, "no upstream", true),
 			})
 		} else {
 			_ = table.Append([]string{
@@ -118,9 +119,10 @@ func render(results []git.RepoStatus) {
 				git.ColorBool(s.PullNeeded, true),
 				git.ColorBool(s.Diverged, true),
 				git.ColorBool(s.Untracked, false),
+				git.ColorBool(s.NoUpstream, true),
 			})
 
-			table.Header([]string{"PATH", "DIRTY", "PUSH", "PULL", "DIVERGED", "UNTRACKED"})
+			table.Header([]string{"PATH", "DIRTY", "PUSH", "PULL", "DIVERGED", "UNTRACKED", "NO UPSTREAM"})
 
 		}
 	}
@@ -128,7 +130,7 @@ func render(results []git.RepoStatus) {
 	fmt.Println()
 	_ = table.Render()
 
-	fmt.Printf("\n  %s = clean   %s = dirty / untracked   %s = sync needed\n",
+	fmt.Printf("\n  %s = clean   %s = dirty / untracked   %s = sync needed / no upstream\n",
 		color.GreenString("■"),
 		color.YellowString("■"),
 		color.RedString("■"),

@@ -65,4 +65,5 @@ git-repo sync
 --pull        Show only repos that need a pull
 --diverged    Show only repos that have diverged from remote
 --untracked   Show only repos with untracked files
+--no-upstream Show only repos whose branch has no upstream tracking branch
 ```

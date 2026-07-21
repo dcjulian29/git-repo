@@ -23,12 +23,22 @@ import (
 )
 
 // Synchronize performs a full sync cycle on a single repository: fetch, then
-// pull (rebase + prune + submodules) if behind, then push if ahead. When the
-// working tree is dirty the sync is skipped with a notice in Output.
+// pull (rebase + prune + submodules) if behind, then push if ahead. The sync is
+// skipped with a notice in Output when the working tree is dirty or when the
+// branch has no upstream tracking branch to sync against.
 func Synchronize(path string) SyncResult {
 	_ = CaptureOutput(path, "fetch")
 
 	dirty := CaptureOutput(path, "diff", "--stat")
+
+	if len(dirty) > 0 {
+		return SyncResult{Folder: path, Output: textformat.Info("Skipping — working tree is not clean.")}
+	}
+
+	if !HasUpstream(path) {
+		return SyncResult{Folder: path, Output: textformat.Info("Skipping — no upstream tracking branch.")}
+	}
+
 	local := CaptureOutput(path, "rev-parse", "@")
 	remote := CaptureOutput(path, "rev-parse", "@{u}")
 	base := CaptureOutput(path, "merge-base", "@", "@{u}")
@@ -49,20 +59,16 @@ func Synchronize(path string) SyncResult {
 
 	var output string
 
-	if len(dirty) > 0 {
-		output = textformat.Info("Skipping — working tree is not clean.")
-	} else {
-		if pull {
-			output = CaptureError(path, "pull", "--rebase", "--prune", "--recurse-submodules=yes")
-		}
+	if pull {
+		output = CaptureError(path, "pull", "--rebase", "--prune", "--recurse-submodules=yes")
+	}
 
-		if push {
-			pushOut := CaptureError(path, "push")
-			if len(output) > 0 {
-				output = fmt.Sprintf("%s\n\n%s", output, pushOut)
-			} else {
-				output = pushOut
-			}
+	if push {
+		pushOut := CaptureError(path, "push")
+		if len(output) > 0 {
+			output = fmt.Sprintf("%s\n\n%s", output, pushOut)
+		} else {
+			output = pushOut
 		}
 	}
 

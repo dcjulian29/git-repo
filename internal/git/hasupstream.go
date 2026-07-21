@@ -14,29 +14,17 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package status
+package git
 
-import (
-	"github.com/dcjulian29/git-repo/internal/git"
-)
+import "github.com/dcjulian29/go-toolbox/execute"
 
-func filter(s git.RepoStatus) bool {
-	switch {
-	case dirty:
-		return s.Dirty
-	case pull:
-		return s.PullNeeded
-	case push:
-		return s.PushNeeded
-	case diverged:
-		return s.Diverged
-	case untracked:
-		return s.Untracked
-	case noUpstream:
-		return s.NoUpstream
-	case actions:
-		return s.Dirty || s.PullNeeded || s.PushNeeded || s.Diverged || s.Untracked || s.NoUpstream
-	default:
-		return true
-	}
+// HasUpstream reports whether the current branch of the repository rooted at
+// path has an upstream tracking branch configured. It relies on the exit code
+// of "git rev-parse @{u}" rather than parsing output, so it is not fooled by an
+// empty capture from an unrelated failure.
+func HasUpstream(path string) bool {
+	params := []string{"-C", path, "rev-parse", "--abbrev-ref", "--symbolic-full-name", "@{u}"}
+	_, err := execute.ExternalProgramCapture("git", params...)
+
+	return err == nil
 }

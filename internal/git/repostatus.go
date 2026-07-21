@@ -37,4 +37,10 @@ type RepoStatus struct {
 
 	// Untracked is true when there are untracked files in the working tree.
 	Untracked bool
+
+	// NoUpstream is true when the current branch has no upstream tracking
+	// branch, so it cannot be compared against a remote. When set, the
+	// PushNeeded, PullNeeded, and Diverged flags are not meaningful and are
+	// left false.
+	NoUpstream bool
 }

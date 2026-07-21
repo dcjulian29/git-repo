@@ -31,12 +31,13 @@ import (
 )
 
 var (
-	actions   bool
-	dirty     bool
-	push      bool
-	pull      bool
-	diverged  bool
-	untracked bool
+	actions    bool
+	dirty      bool
+	push       bool
+	pull       bool
+	diverged   bool
+	untracked  bool
+	noUpstream bool
 )
 
 // NewCommand returns a cobra.Command that walks a directory tree and prints a
@@ -124,6 +125,7 @@ func NewCommand() *cobra.Command {
 	cmd.Flags().BoolVar(&pull, "pull", false, "show only repositories that need a pull")
 	cmd.Flags().BoolVar(&diverged, "diverged", false, "show only diverged repositories")
 	cmd.Flags().BoolVar(&untracked, "untracked", false, "show only repositories with untracked files")
+	cmd.Flags().BoolVar(&noUpstream, "no-upstream", false, "show only repositories with no upstream tracking branch")
 
 	return cmd
 }

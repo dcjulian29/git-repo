@@ -17,35 +17,41 @@ limitations under the License.
 package git
 
 // ComputeStatus fetches from the remote and derives the full status for
-// a single repository rooted at path.
+// a single repository rooted at path. When the current branch has no upstream
+// tracking branch the push/pull/diverged comparison is skipped and NoUpstream
+// is set instead, because there is no remote to compare against.
 func ComputeStatus(path string) RepoStatus {
 	_ = CaptureOutput(path, "fetch")
 
 	dirty := CaptureOutput(path, "diff", "--stat")
 	untracked := CaptureOutput(path, "ls-files", "--others", "--exclude-standard")
+
+	status := RepoStatus{
+		Folder:    path,
+		Dirty:     len(dirty) > 0,
+		Untracked: len(untracked) > 0,
+	}
+
+	if !HasUpstream(path) {
+		status.NoUpstream = true
+
+		return status
+	}
+
 	local := CaptureOutput(path, "rev-parse", "@")
 	remote := CaptureOutput(path, "rev-parse", "@{u}")
 	base := CaptureOutput(path, "merge-base", "@", "@{u}")
 
-	pull, push, diverged := false, false, false
-
 	if local != remote {
 		switch {
 		case local == base:
-			pull = true
+			status.PullNeeded = true
 		case remote == base:
-			push = true
+			status.PushNeeded = true
 		default:
-			diverged = true
+			status.Diverged = true
 		}
 	}
 
-	return RepoStatus{
-		Folder:     path,
-		Dirty:      len(dirty) > 0,
-		PushNeeded: push,
-		PullNeeded: pull,
-		Diverged:   diverged,
-		Untracked:  len(untracked) > 0,
-	}
+	return status
 }

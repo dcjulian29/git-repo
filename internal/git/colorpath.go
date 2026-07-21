@@ -20,13 +20,13 @@ import "github.com/fatih/color"
 
 // ColorPath returns an ANSI-coloured string for the repository path:
 //   - yellow  when the working tree is dirty
-//   - red     when a push or pull is needed
+//   - red     when a push or pull is needed, or the branch has no upstream
 //   - green   when everything is clean and in sync
 func ColorPath(s RepoStatus) string {
 	switch {
 	case s.Dirty:
 		return color.YellowString(s.Folder)
-	case s.PullNeeded || s.PushNeeded:
+	case s.PullNeeded || s.PushNeeded || s.NoUpstream:
 		return color.RedString(s.Folder)
 	default:
 		return color.GreenString(s.Folder)
