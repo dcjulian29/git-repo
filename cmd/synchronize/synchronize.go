@@ -21,7 +21,6 @@ import (
 	"fmt"
 	"sort"
 	"strings"
-	"sync"
 
 	"github.com/dcjulian29/git-repo/internal/config"
 	"github.com/dcjulian29/git-repo/internal/git"
@@ -77,32 +76,7 @@ func NewCommand() *cobra.Command {
 				return fmt.Errorf("failed to walk directory: %w", err)
 			}
 
-			var (
-				wg      sync.WaitGroup
-				mu      sync.Mutex
-				results []git.SyncResult
-				ch      = make(chan git.SyncResult, len(dirs))
-			)
-
-			for _, d := range dirs {
-				wg.Add(1)
-
-				go func(dir string) {
-					defer wg.Done()
-					ch <- git.Synchronize(dir)
-				}(d)
-			}
-
-			go func() {
-				wg.Wait()
-				close(ch)
-			}()
-
-			for r := range ch {
-				mu.Lock()
-				results = append(results, r)
-				mu.Unlock()
-			}
+			results := shared.ParallelMap(dirs, shared.DefaultConcurrency(), git.Synchronize)
 
 			_ = spinner.Stop()
 
