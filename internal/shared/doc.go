@@ -14,6 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-// Package shared provides common types, configuration helpers, Git operation
-// wrappers, and display utilities used by all git-repo sub-commands.
+// Package shared provides small utilities used across the git-repo
+// sub-commands: a conditional (ternary) helper, a preconfigured terminal
+// spinner, and bounded parallel execution of per-repository work.
 package shared

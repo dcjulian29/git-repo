@@ -15,8 +15,8 @@ limitations under the License.
 */
 
 // Package cmd contains all Cobra sub-commands for the git-repo CLI.
-// The root command initializes Viper configuration and wires together all
-// sub-commands so that they are available from the single git-repo binary.
+// The root command wires together all sub-commands so that they are available
+// from the single git-repo binary.
 package cmd
 
 import (
