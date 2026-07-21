@@ -63,6 +63,13 @@ func NewCommand() *cobra.Command {
 				return err
 			}
 
+			if cfg.Directory == "" {
+				return fmt.Errorf(
+					"configuration key 'directory' is not set; " +
+						"set it with: git-repo config directory <path>",
+				)
+			}
+
 			root := filesystem.ExpandHome(cfg.Directory)
 
 			spinner, err := shared.NewSpinner()
