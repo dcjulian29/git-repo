@@ -26,6 +26,8 @@ import (
 )
 
 func addCmd() *cobra.Command {
+	var noManage bool
+
 	cmd := &cobra.Command{
 		Use:   "add <name> <url>",
 		Short: "Add a repository to the configuration",
@@ -62,7 +64,13 @@ func addCmd() *cobra.Command {
 				}
 			}
 
-			cfg.Repositories = append(cfg.Repositories, config.Repository{Name: name, URL: url})
+			repo := config.Repository{Name: name, URL: url}
+			if noManage {
+				value := false
+				repo.Manage = &value
+			}
+
+			cfg.Repositories = append(cfg.Repositories, repo)
 
 			if err := config.Save(&cfg); err != nil {
 				return err
@@ -76,6 +84,9 @@ func addCmd() *cobra.Command {
 			return nil
 		},
 	}
+
+	cmd.Flags().BoolVar(&noManage, "no-manage", false,
+		"add the repository as unmanaged so pr and issue commands skip it")
 
 	return cmd
 }

@@ -32,8 +32,10 @@ func NewCommand() *cobra.Command {
 	cmd.AddCommand(addCmd())
 	cmd.AddCommand(directoryCmd())
 	cmd.AddCommand(listCmd())
+	cmd.AddCommand(manageCmd())
 	cmd.AddCommand(removeCmd())
 	cmd.AddCommand(showCmd())
+	cmd.AddCommand(unmanageCmd())
 
 	return cmd
 }

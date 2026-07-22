@@ -12,3 +12,10 @@ repositories:
     url: https://github.com/example/my-project.git
   - name: another-repo
     url: git@github.com:example/another-repo.git
+
+  # Third-party repositories you clone but do not own: set manage: false so the
+  # pull-request and issue commands skip them. Omit it (the default) for repos
+  # you manage.
+  - name: some-dependency
+    url: https://github.com/other/some-dependency.git
+    manage: false

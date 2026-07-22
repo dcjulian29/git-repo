@@ -10,9 +10,11 @@ git-repo is a CLI binary that combines multiple repository git workflows, built 
 |---|---|
 | `git-repo config show` | Print the full configuration |
 | `git-repo config directory <path>` | Set or change the managed directory |
-| `git-repo config add <name> <url>` | Add a repository to the config |
+| `git-repo config add <name> <url>` | Add a repository to the config (`--no-manage` to skip pr/issue commands) |
 | `git-repo config remove <name>` | Remove a repository from the config |
 | `git-repo config list` | List all configured repositories |
+| `git-repo config manage <name>` | Mark a repository as managed (pr/issue commands include it) |
+| `git-repo config unmanage <name>` | Mark a repository as unmanaged (pr/issue commands skip it) |
 | `git-repo init` | Clone missing repos defined in config; skip those that exist |
 | `git-repo status` | Colour-coded table: dirty / push / pull / diverged / untracked |
 | `git-repo sync` | Fetch → pull (rebase + prune + submodules) → push |

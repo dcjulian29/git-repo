@@ -25,4 +25,17 @@ type Repository struct {
 
 	// URL is the remote Git URL used when cloning.
 	URL string `yaml:"url"`
+
+	// Manage controls whether the pull-request and issue commands operate on
+	// this repository. It defaults to true when omitted; set it to false for
+	// third-party repositories that are cloned but not managed. A nil pointer
+	// is treated as unset and therefore managed.
+	Manage *bool `yaml:"manage,omitempty"`
+}
+
+// Managed reports whether the pull-request and issue commands should operate on
+// this repository. Repositories are managed by default unless manage is
+// explicitly set to false in the configuration.
+func (r Repository) Managed() bool {
+	return r.Manage == nil || *r.Manage
 }

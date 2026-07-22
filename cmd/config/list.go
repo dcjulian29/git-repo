@@ -52,10 +52,15 @@ func showRepositories(cfg *config.Configuration) error {
 	}
 
 	table := tablewriter.NewWriter(os.Stdout)
-	table.Header([]string{"Name", "URL"})
+	table.Header([]string{"Name", "URL", "Managed"})
 
 	for _, r := range cfg.Repositories {
-		if err := table.Append([]string{color.GreenString(r.Name), color.CyanString(r.URL)}); err != nil {
+		managed := color.GreenString("yes")
+		if !r.Managed() {
+			managed = color.YellowString("no")
+		}
+
+		if err := table.Append([]string{color.GreenString(r.Name), color.CyanString(r.URL), managed}); err != nil {
 			return err
 		}
 	}
