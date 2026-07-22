@@ -59,8 +59,8 @@ func (c *Client) OpenItems(ctx context.Context, repo Repo) ([]Item, error) {
 		endpoint := fmt.Sprintf("%s/repos/%s/%s/issues?state=open&per_page=%d&page=%d",
 			c.baseURL, url.PathEscape(repo.Owner), url.PathEscape(repo.Name), pageSize, page)
 
-		batch, err := c.fetchIssues(ctx, endpoint)
-		if err != nil {
+		var batch []issuePayload
+		if err := c.getJSON(ctx, endpoint, &batch); err != nil {
 			return nil, err
 		}
 
@@ -76,11 +76,12 @@ func (c *Client) OpenItems(ctx context.Context, repo Repo) ([]Item, error) {
 	return items, nil
 }
 
-// fetchIssues performs a single authenticated GET and decodes the issue array.
-func (c *Client) fetchIssues(ctx context.Context, endpoint string) ([]issuePayload, error) {
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, endpoint, nil) //nolint:gosec // G107: endpoint is built from the fixed api base and URL-escaped owner/name
+// getJSON performs a single authenticated GET against endpoint and decodes the
+// JSON body into out.
+func (c *Client) getJSON(ctx context.Context, endpoint string, out any) error {
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, endpoint, nil) //nolint:gosec // G107: endpoint is built from the fixed api base and URL-escaped path
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	req.Header.Set("Authorization", "Bearer "+c.token)
@@ -89,7 +90,7 @@ func (c *Client) fetchIssues(ctx context.Context, endpoint string) ([]issuePaylo
 
 	resp, err := c.http.Do(req)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	defer func() { _ = resp.Body.Close() }()
@@ -97,13 +98,12 @@ func (c *Client) fetchIssues(ctx context.Context, endpoint string) ([]issuePaylo
 	if resp.StatusCode != http.StatusOK {
 		body, _ := io.ReadAll(io.LimitReader(resp.Body, 512))
 
-		return nil, fmt.Errorf("github api request failed (%s): %s", resp.Status, string(body))
+		return fmt.Errorf("github api request failed (%s): %s", resp.Status, string(body))
 	}
 
-	var payload []issuePayload
-	if err := json.NewDecoder(resp.Body).Decode(&payload); err != nil {
-		return nil, fmt.Errorf("decoding github response: %w", err)
+	if err := json.NewDecoder(resp.Body).Decode(out); err != nil {
+		return fmt.Errorf("decoding github response: %w", err)
 	}
 
-	return payload, nil
+	return nil
 }

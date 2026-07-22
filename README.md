@@ -19,6 +19,8 @@ git-repo is a CLI binary that combines multiple repository git workflows, built 
 | `git-repo status` | Colour-coded table: dirty / push / pull / diverged / untracked |
 | `git-repo sync` | Fetch → pull (rebase + prune + submodules) → push |
 | `git-repo pr list` | List open pull requests across managed GitHub repos (`--json`) |
+| `git-repo pr open <repo>#<n>` | Open a pull request in the default browser |
+| `git-repo pr show <repo>#<n>` | Show a PR's mergeability, conflicts, checks, and dependabot compatibility |
 | `git-repo issue list` | List open issues across managed GitHub repos (`--json`) |
 
 ## GitHub authentication
