@@ -18,6 +18,15 @@ git-repo is a CLI binary that combines multiple repository git workflows, built 
 | `git-repo init` | Clone missing repos defined in config; skip those that exist |
 | `git-repo status` | Colour-coded table: dirty / push / pull / diverged / untracked |
 | `git-repo sync` | Fetch → pull (rebase + prune + submodules) → push |
+| `git-repo pr list` | List open pull requests across managed GitHub repos (`--json`) |
+| `git-repo issue list` | List open issues across managed GitHub repos (`--json`) |
+
+## GitHub authentication
+
+The `pr` and `issue` commands need a GitHub token. It is read from the
+`GITHUB_TOKEN` environment variable, falling back to `gh auth token` — never from
+the configuration file. Only `github.com` repositories are queried; others are
+skipped with a notice, as are repositories marked `manage: false`.
 
 ## Configuration
 

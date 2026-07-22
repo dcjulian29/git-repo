@@ -42,14 +42,14 @@ func DefaultConcurrency() int {
 
 // ParallelMap applies fn to every input concurrently, running at most limit
 // invocations at a time, and returns the results in input order. A limit below
-// one is treated as one. It is used to fan out per-repository work without
-// spawning an unbounded number of git subprocesses.
-func ParallelMap[T any](inputs []string, limit int, fn func(string) T) []T {
+// one is treated as one. It is used to fan out per-repository work (git
+// subprocesses, GitHub API calls) without spawning an unbounded number of them.
+func ParallelMap[I, O any](inputs []I, limit int, fn func(I) O) []O {
 	if limit < 1 {
 		limit = 1
 	}
 
-	results := make([]T, len(inputs))
+	results := make([]O, len(inputs))
 
 	var wg sync.WaitGroup
 
@@ -58,7 +58,7 @@ func ParallelMap[T any](inputs []string, limit int, fn func(string) T) []T {
 	for i, in := range inputs {
 		wg.Add(1)
 
-		go func(i int, in string) {
+		go func(i int, in I) {
 			defer wg.Done()
 
 			sem <- struct{}{}

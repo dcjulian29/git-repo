@@ -25,6 +25,8 @@ import (
 
 	"github.com/dcjulian29/git-repo/cmd/config"
 	"github.com/dcjulian29/git-repo/cmd/initialize"
+	"github.com/dcjulian29/git-repo/cmd/issue"
+	"github.com/dcjulian29/git-repo/cmd/pr"
 	"github.com/dcjulian29/git-repo/cmd/status"
 	"github.com/dcjulian29/git-repo/cmd/synchronize"
 	"github.com/dcjulian29/go-toolbox/textformat"
@@ -60,6 +62,8 @@ func Execute() {
 func init() {
 	rootCmd.AddCommand(config.NewCommand())
 	rootCmd.AddCommand(initialize.NewCommand())
+	rootCmd.AddCommand(issue.NewCommand())
+	rootCmd.AddCommand(pr.NewCommand())
 	rootCmd.AddCommand(status.NewCommand())
 	rootCmd.AddCommand(synchronize.NewCommand())
 }
