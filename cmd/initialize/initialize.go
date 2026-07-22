@@ -19,6 +19,7 @@ limitations under the License.
 package initialize
 
 import (
+	"errors"
 	"fmt"
 	"path/filepath"
 	"strings"
@@ -57,14 +58,14 @@ func NewCommand() *cobra.Command {
 			}
 
 			if cfg.Directory == "" {
-				return fmt.Errorf(
+				return errors.New(
 					"configuration key 'directory' is not set; " +
 						"set it with: git-repo config directory <path>",
 				)
 			}
 
 			if len(cfg.Repositories) == 0 {
-				return fmt.Errorf(
+				return errors.New(
 					"no repositories are configured; " +
 						"add one with: git-repo config add <name> <url>",
 				)

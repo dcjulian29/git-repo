@@ -1,0 +1,32 @@
+---
+version: "2"
+
+issues:
+  max-issues-per-linter: 0
+  max-same-issues: 0
+
+linters:
+  enable:
+    - copyloopvar
+    - durationcheck
+    - errorlint
+    - godot
+    - gosec
+    - intrange
+    - misspell
+    - perfsprint
+    - predeclared
+    - revive
+    - unconvert
+    - usestdlibvars
+    - wastedassign
+  settings:
+    godot:
+      scope: declarations
+  exclusions:
+    rules:
+      # Test scaffolding legitimately creates temp dirs/files and launches the
+      # git subprocess with variable arguments; gosec targets production code.
+      - path: _test\.go
+        linters:
+          - gosec

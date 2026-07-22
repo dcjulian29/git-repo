@@ -52,7 +52,8 @@ func load() (*Configuration, error) {
 		return cfg, nil
 	}
 
-	file, err := os.ReadFile(filePath)
+	file, err := os.ReadFile(filePath) //nolint:gosec // G304: reads the app's own config file (home dir + constant name), not external input
+
 	if err != nil {
 		return cfg, fmt.Errorf("could not read git repository configuration: %w", err)
 	}

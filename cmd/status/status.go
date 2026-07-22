@@ -18,6 +18,7 @@ limitations under the License.
 package status
 
 import (
+	"errors"
 	"fmt"
 	"sort"
 	"strings"
@@ -63,7 +64,7 @@ func NewCommand() *cobra.Command {
 			}
 
 			if cfg.Directory == "" {
-				return fmt.Errorf(
+				return errors.New(
 					"configuration key 'directory' is not set; " +
 						"set it with: git-repo config directory <path>",
 				)
