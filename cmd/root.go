@@ -26,6 +26,7 @@ import (
 	"github.com/dcjulian29/git-repo/cmd/config"
 	"github.com/dcjulian29/git-repo/cmd/initialize"
 	"github.com/dcjulian29/git-repo/cmd/issue"
+	"github.com/dcjulian29/git-repo/cmd/label"
 	"github.com/dcjulian29/git-repo/cmd/pr"
 	"github.com/dcjulian29/git-repo/cmd/status"
 	"github.com/dcjulian29/git-repo/cmd/synchronize"
@@ -63,6 +64,7 @@ func init() {
 	rootCmd.AddCommand(config.NewCommand())
 	rootCmd.AddCommand(initialize.NewCommand())
 	rootCmd.AddCommand(issue.NewCommand())
+	rootCmd.AddCommand(label.NewCommand())
 	rootCmd.AddCommand(pr.NewCommand())
 	rootCmd.AddCommand(status.NewCommand())
 	rootCmd.AddCommand(synchronize.NewCommand())

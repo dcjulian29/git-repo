@@ -84,6 +84,30 @@ func ParseRef(handle string) (Ref, error) {
 	return Ref{}, fmt.Errorf("repository %q is not in the configuration", name)
 }
 
+// ResolveRepo resolves a configuration repository name to its display name and
+// parsed github.com repository. The repository must exist in the configuration.
+func ResolveRepo(name string) (string, github.Repo, error) {
+	cfg, err := config.Load()
+	if err != nil {
+		return "", github.Repo{}, err
+	}
+
+	for _, repository := range cfg.Repositories {
+		if !strings.EqualFold(repository.Name, name) {
+			continue
+		}
+
+		repo, err := github.ParseRepo(repository.URL)
+		if err != nil {
+			return "", github.Repo{}, fmt.Errorf("%s is not a github.com repository", repository.Name)
+		}
+
+		return repository.Name, repo, nil
+	}
+
+	return "", github.Repo{}, fmt.Errorf("repository %q is not in the configuration", name)
+}
+
 // localPath builds the on-disk clone directory for a repository, expanding the
 // configured base directory and splitting names that contain path separators.
 func localPath(directory, name string) string {

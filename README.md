@@ -32,6 +32,9 @@ git-repo is a CLI binary that combines multiple repository git workflows, built 
 | `git-repo issue close <repo>#<n>` | Comment and close as completed (confirmation required) |
 | `git-repo issue reject <repo>#<n>` | Comment and close as not planned (confirmation required) |
 | `git-repo issue duplicate <repo>#<n> --of <m>` | Mark as duplicate of `#m` and close (confirmation required) |
+| `git-repo label list <repo>` | List a repository's labels |
+| `git-repo label create <repo> <name>` | Create a label (`--color`, `--description`) |
+| `git-repo label remove <repo> <name>` | Delete a label (confirmation required) |
 
 ## GitHub authentication
 

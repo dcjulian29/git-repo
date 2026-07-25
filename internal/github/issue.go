@@ -108,35 +108,6 @@ func (c *Client) GetIssue(ctx context.Context, repo Repo, number int) (Issue, er
 	return issue, nil
 }
 
-// Labels returns the names of every label defined in the repository, following
-// pagination.
-func (c *Client) Labels(ctx context.Context, repo Repo) ([]string, error) {
-	var names []string
-
-	for page := 1; ; page++ {
-		endpoint := fmt.Sprintf("%s/repos/%s/%s/labels?per_page=%d&page=%d",
-			c.baseURL, url.PathEscape(repo.Owner), url.PathEscape(repo.Name), pageSize, page)
-
-		var batch []struct {
-			Name string `json:"name"`
-		}
-
-		if err := c.doJSON(ctx, http.MethodGet, endpoint, nil, &batch); err != nil {
-			return nil, err
-		}
-
-		for _, label := range batch {
-			names = append(names, label.Name)
-		}
-
-		if len(batch) < pageSize {
-			break
-		}
-	}
-
-	return names, nil
-}
-
 // AddLabels adds the given labels to an issue.
 func (c *Client) AddLabels(ctx context.Context, repo Repo, number int, labels []string) error {
 	endpoint := fmt.Sprintf("%s/repos/%s/%s/issues/%d/labels",
