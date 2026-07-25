@@ -19,6 +19,7 @@ package github
 import (
 	"context"
 	"fmt"
+	"net/http"
 	"net/url"
 )
 
@@ -103,23 +104,28 @@ func (c *Client) GetPull(ctx context.Context, repo Repo, number int) (PullReques
 		c.baseURL, url.PathEscape(repo.Owner), url.PathEscape(repo.Name), number)
 
 	var payload pullPayload
-	if err := c.getJSON(ctx, endpoint, &payload); err != nil {
+	if err := c.doJSON(ctx, http.MethodGet, endpoint, nil, &payload); err != nil {
 		return PullRequest{}, err
 	}
 
+	return payload.toPullRequest(), nil
+}
+
+// toPullRequest converts a decoded pull-request payload to the exported type.
+func (p pullPayload) toPullRequest() PullRequest {
 	return PullRequest{
-		Number:         payload.Number,
-		Title:          payload.Title,
-		Author:         payload.User.Login,
-		State:          payload.State,
-		Draft:          payload.Draft,
-		HeadRef:        payload.Head.Ref,
-		HeadSHA:        payload.Head.SHA,
-		BaseRef:        payload.Base.Ref,
-		Mergeable:      payload.Mergeable,
-		MergeableState: payload.MergeableState,
-		Body:           payload.Body,
-		URL:            payload.HTMLURL,
-		HeadRepo:       payload.Head.Repo.FullName,
-	}, nil
+		Number:         p.Number,
+		Title:          p.Title,
+		Author:         p.User.Login,
+		State:          p.State,
+		Draft:          p.Draft,
+		HeadRef:        p.Head.Ref,
+		HeadSHA:        p.Head.SHA,
+		BaseRef:        p.Base.Ref,
+		Mergeable:      p.Mergeable,
+		MergeableState: p.MergeableState,
+		Body:           p.Body,
+		URL:            p.HTMLURL,
+		HeadRepo:       p.Head.Repo.FullName,
+	}
 }

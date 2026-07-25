@@ -24,6 +24,14 @@ git-repo is a CLI binary that combines multiple repository git workflows, built 
 | `git-repo pr checkout <repo>#<n>` | Fetch and check out a PR branch in the local clone |
 | `git-repo pr approve <repo>#<n>` | Review a PR, then merge after confirmation (`--method`, `-y`) |
 | `git-repo issue list` | List open issues across managed GitHub repos (`--json`) |
+| `git-repo issue open <repo>#<n>` | Open an issue in the default browser |
+| `git-repo issue show <repo>#<n>` | Show an issue's details, labels, and assignees |
+| `git-repo issue triage <repo>#<n>` | Label and assign an issue (prompts when flags omitted) |
+| `git-repo issue checkout <repo>#<n>` | Create a branch + draft PR (linked via `Closes #n`) to start work |
+| `git-repo issue accept <repo>#<n>` | Apply an existing label (`--label`, required); optional `--assignee` |
+| `git-repo issue close <repo>#<n>` | Comment and close as completed (confirmation required) |
+| `git-repo issue reject <repo>#<n>` | Comment and close as not planned (confirmation required) |
+| `git-repo issue duplicate <repo>#<n> --of <m>` | Mark as duplicate of `#m` and close (confirmation required) |
 
 ## GitHub authentication
 

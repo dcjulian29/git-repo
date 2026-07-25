@@ -17,6 +17,7 @@ limitations under the License.
 package github
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -60,7 +61,7 @@ func (c *Client) OpenItems(ctx context.Context, repo Repo) ([]Item, error) {
 			c.baseURL, url.PathEscape(repo.Owner), url.PathEscape(repo.Name), pageSize, page)
 
 		var batch []issuePayload
-		if err := c.getJSON(ctx, endpoint, &batch); err != nil {
+		if err := c.doJSON(ctx, http.MethodGet, endpoint, nil, &batch); err != nil {
 			return nil, err
 		}
 
@@ -76,10 +77,22 @@ func (c *Client) OpenItems(ctx context.Context, repo Repo) ([]Item, error) {
 	return items, nil
 }
 
-// getJSON performs a single authenticated GET against endpoint and decodes the
-// JSON body into out.
-func (c *Client) getJSON(ctx context.Context, endpoint string, out any) error {
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, endpoint, nil) //nolint:gosec // G107: endpoint is built from the fixed api base and URL-escaped path
+// doJSON performs an authenticated request against endpoint. When body is
+// non-nil it is JSON-encoded as the request payload; when out is non-nil the
+// response body is decoded into it. Any non-2xx status is returned as an error.
+func (c *Client) doJSON(ctx context.Context, method, endpoint string, body, out any) error {
+	var reader io.Reader
+
+	if body != nil {
+		data, err := json.Marshal(body)
+		if err != nil {
+			return err
+		}
+
+		reader = bytes.NewReader(data)
+	}
+
+	req, err := http.NewRequestWithContext(ctx, method, endpoint, reader) //nolint:gosec // G107: endpoint is built from the fixed api base and URL-escaped path
 	if err != nil {
 		return err
 	}
@@ -88,6 +101,10 @@ func (c *Client) getJSON(ctx context.Context, endpoint string, out any) error {
 	req.Header.Set("Accept", "application/vnd.github+json")
 	req.Header.Set("X-GitHub-Api-Version", "2022-11-28")
 
+	if body != nil {
+		req.Header.Set("Content-Type", "application/json")
+	}
+
 	resp, err := c.http.Do(req)
 	if err != nil {
 		return err
@@ -95,14 +112,16 @@ func (c *Client) getJSON(ctx context.Context, endpoint string, out any) error {
 
 	defer func() { _ = resp.Body.Close() }()
 
-	if resp.StatusCode != http.StatusOK {
-		body, _ := io.ReadAll(io.LimitReader(resp.Body, 512))
+	if resp.StatusCode < http.StatusOK || resp.StatusCode >= http.StatusMultipleChoices {
+		message, _ := io.ReadAll(io.LimitReader(resp.Body, 512))
 
-		return fmt.Errorf("github api request failed (%s): %s", resp.Status, string(body))
+		return fmt.Errorf("github api request failed (%s): %s", resp.Status, string(message))
 	}
 
-	if err := json.NewDecoder(resp.Body).Decode(out); err != nil {
-		return fmt.Errorf("decoding github response: %w", err)
+	if out != nil {
+		if err := json.NewDecoder(resp.Body).Decode(out); err != nil {
+			return fmt.Errorf("decoding github response: %w", err)
+		}
 	}
 
 	return nil

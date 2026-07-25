@@ -28,7 +28,15 @@ func NewCommand() *cobra.Command {
 		Aliases: []string{"issues"},
 	}
 
+	cmd.AddCommand(acceptCmd())
+	cmd.AddCommand(checkoutCmd())
+	cmd.AddCommand(closeCmd())
+	cmd.AddCommand(duplicateCmd())
 	cmd.AddCommand(listCmd())
+	cmd.AddCommand(openCmd())
+	cmd.AddCommand(rejectCmd())
+	cmd.AddCommand(showCmd())
+	cmd.AddCommand(triageCmd())
 
 	return cmd
 }

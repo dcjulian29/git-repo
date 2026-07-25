@@ -48,6 +48,23 @@ func ShowPull(ctx context.Context, ref Ref) error {
 	return err
 }
 
+// ShowIssue fetches and prints the details of a single issue.
+func ShowIssue(ctx context.Context, ref Ref) error {
+	client, err := newClient()
+	if err != nil {
+		return err
+	}
+
+	issue, err := client.GetIssue(ctx, ref.Repo, ref.Number)
+	if err != nil {
+		return err
+	}
+
+	renderIssue(ref, issue)
+
+	return nil
+}
+
 // describe fetches a pull request with its checks and compatibility score,
 // renders the summary, and returns the pull request for further action.
 func describe(ctx context.Context, client *github.Client, ref Ref) (github.PullRequest, error) {

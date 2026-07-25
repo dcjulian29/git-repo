@@ -14,22 +14,27 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package github
+package issue
 
 import (
 	"context"
-	"fmt"
-	"net/http"
-	"net/url"
+
+	"github.com/dcjulian29/git-repo/internal/review"
+	"github.com/spf13/cobra"
 )
 
-// MergeMethods lists the merge methods GitHub accepts.
-var MergeMethods = []string{"merge", "squash", "rebase"}
+func showCmd() *cobra.Command {
+	return &cobra.Command{
+		Use:   "show <repo>#<number>",
+		Short: "Show an issue's details, labels, and assignees",
+		Args:  cobra.ExactArgs(1),
+		RunE: func(_ *cobra.Command, args []string) error {
+			ref, err := review.ParseRef(args[0])
+			if err != nil {
+				return err
+			}
 
-// MergePull merges the given pull request using method (one of MergeMethods).
-func (c *Client) MergePull(ctx context.Context, repo Repo, number int, method string) error {
-	endpoint := fmt.Sprintf("%s/repos/%s/%s/pulls/%d/merge",
-		c.baseURL, url.PathEscape(repo.Owner), url.PathEscape(repo.Name), number)
-
-	return c.doJSON(ctx, http.MethodPut, endpoint, map[string]string{"merge_method": method}, nil)
+			return review.ShowIssue(context.Background(), ref)
+		},
+	}
 }

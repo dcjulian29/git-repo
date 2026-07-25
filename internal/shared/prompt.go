@@ -14,22 +14,25 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package github
+package shared
 
 import (
-	"context"
+	"bufio"
+	"errors"
 	"fmt"
-	"net/http"
-	"net/url"
+	"io"
+	"strings"
 )
 
-// MergeMethods lists the merge methods GitHub accepts.
-var MergeMethods = []string{"merge", "squash", "rebase"}
+// Prompt writes question to out and returns the trimmed line read from in. An
+// empty line or EOF yields an empty string.
+func Prompt(in io.Reader, out io.Writer, question string) (string, error) {
+	_, _ = fmt.Fprint(out, question)
 
-// MergePull merges the given pull request using method (one of MergeMethods).
-func (c *Client) MergePull(ctx context.Context, repo Repo, number int, method string) error {
-	endpoint := fmt.Sprintf("%s/repos/%s/%s/pulls/%d/merge",
-		c.baseURL, url.PathEscape(repo.Owner), url.PathEscape(repo.Name), number)
+	line, err := bufio.NewReader(in).ReadString('\n')
+	if err != nil && !errors.Is(err, io.EOF) {
+		return "", err
+	}
 
-	return c.doJSON(ctx, http.MethodPut, endpoint, map[string]string{"merge_method": method}, nil)
+	return strings.TrimSpace(line), nil
 }

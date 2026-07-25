@@ -19,6 +19,7 @@ package github
 import (
 	"context"
 	"fmt"
+	"net/http"
 	"net/url"
 )
 
@@ -64,7 +65,7 @@ func (c *Client) Checks(ctx context.Context, repo Repo, sha string) ([]CheckRun,
 		} `json:"check_runs"`
 	}
 
-	if err := c.getJSON(ctx, endpoint, &payload); err != nil {
+	if err := c.doJSON(ctx, http.MethodGet, endpoint, nil, &payload); err != nil {
 		return nil, err
 	}
 
