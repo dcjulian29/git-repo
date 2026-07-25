@@ -32,6 +32,7 @@ func NewCommand() *cobra.Command {
 	cmd.AddCommand(checkoutCmd())
 	cmd.AddCommand(closeCmd())
 	cmd.AddCommand(duplicateCmd())
+	cmd.AddCommand(labelCmd())
 	cmd.AddCommand(listCmd())
 	cmd.AddCommand(openCmd())
 	cmd.AddCommand(rejectCmd())

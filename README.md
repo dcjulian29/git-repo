@@ -27,6 +27,7 @@ git-repo is a CLI binary that combines multiple repository git workflows, built 
 | `git-repo issue open <repo>#<n>` | Open an issue in the default browser |
 | `git-repo issue show <repo>#<n>` | Show an issue's details, labels, and assignees |
 | `git-repo issue triage <repo>#<n>` | Label and assign an issue (prompts when flags omitted) |
+| `git-repo issue label <repo>#<n> <label>…` | Add one or more existing labels to an issue |
 | `git-repo issue checkout <repo>#<n>` | Create a branch + draft PR (linked via `Closes #n`) to start work |
 | `git-repo issue accept <repo>#<n>` | Apply an existing label (`--label`, required); optional `--assignee` |
 | `git-repo issue close <repo>#<n>` | Comment and close as completed (confirmation required) |
