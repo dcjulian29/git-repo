@@ -79,7 +79,7 @@ func TestOpenItemsSeparatesIssuesAndPulls(t *testing.T) {
 		]`))
 	})
 
-	items, err := client.OpenItems(context.Background(), Repo{Owner: "dcjulian29", Name: "git-repo"})
+	items, err := client.ListItems(context.Background(), Repo{Owner: "dcjulian29", Name: "git-repo"}, ListOptions{})
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -119,7 +119,7 @@ func TestOpenItemsPaginates(t *testing.T) {
 		}
 	})
 
-	items, err := client.OpenItems(context.Background(), Repo{Owner: "o", Name: "r"})
+	items, err := client.ListItems(context.Background(), Repo{Owner: "o", Name: "r"}, ListOptions{})
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -129,13 +129,46 @@ func TestOpenItemsPaginates(t *testing.T) {
 	}
 }
 
+func TestListItemsAppliesOptionsAndDetectsMerged(t *testing.T) {
+	client := newTestClient(t, func(w http.ResponseWriter, r *http.Request) {
+		query := r.URL.Query()
+		if query.Get("state") != "closed" {
+			t.Errorf("state = %q, want closed", query.Get("state"))
+		}
+
+		if query.Get("labels") != "bug,urgent" {
+			t.Errorf("labels = %q, want bug,urgent", query.Get("labels"))
+		}
+
+		if query.Get("assignee") != "octocat" {
+			t.Errorf("assignee = %q, want octocat", query.Get("assignee"))
+		}
+
+		_, _ = w.Write([]byte(`[
+			{"number":9,"title":"merged pr","user":{"login":"a"},"pull_request":{"url":"u","merged_at":"2026-01-01T00:00:00Z"}},
+			{"number":10,"title":"closed pr","user":{"login":"a"},"pull_request":{"url":"u","merged_at":null}}
+		]`))
+	})
+
+	opts := ListOptions{State: "closed", Labels: []string{"bug", "urgent"}, Assignee: "octocat"}
+
+	items, err := client.ListItems(context.Background(), Repo{Owner: "o", Name: "r"}, opts)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if len(items) != 2 || !items[0].Merged || items[1].Merged {
+		t.Fatalf("merged detection wrong: %+v", items)
+	}
+}
+
 func TestOpenItemsReturnsErrorOnBadStatus(t *testing.T) {
 	client := newTestClient(t, func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusNotFound)
 		_, _ = w.Write([]byte(`{"message":"Not Found"}`))
 	})
 
-	_, err := client.OpenItems(context.Background(), Repo{Owner: "o", Name: "missing"})
+	_, err := client.ListItems(context.Background(), Repo{Owner: "o", Name: "missing"}, ListOptions{})
 	if err == nil {
 		t.Fatal("expected an error for a 404 response")
 	}
@@ -162,7 +195,7 @@ func TestGatherAggregatesAndRecordsErrors(t *testing.T) {
 		{Name: "bad", Repo: Repo{Owner: "o", Name: "bad"}},
 	}
 
-	results := client.Gather(context.Background(), targets, 2)
+	results := client.Gather(context.Background(), targets, 2, ListOptions{})
 	if len(results) != 2 {
 		t.Fatalf("got %d results, want 2", len(results))
 	}

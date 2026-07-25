@@ -45,11 +45,12 @@ type Report struct {
 	Skipped []string
 }
 
-// Collect loads the configuration, resolves a GitHub token, and gathers open
-// issues and pull requests for every managed github.com repository. Managed
-// repositories whose URL is not on github.com are recorded in Report.Skipped
-// instead of being fetched.
-func Collect(ctx context.Context) (Report, error) {
+// Collect loads the configuration, resolves a GitHub token, and gathers the
+// issues and pull requests matching opts for every managed github.com
+// repository. Managed repositories whose URL is not on github.com are recorded
+// in Report.Skipped instead of being fetched. An assignee of "@me" is resolved
+// to the authenticated user's login.
+func Collect(ctx context.Context, opts github.ListOptions) (Report, error) {
 	cfg, err := config.Load()
 	if err != nil {
 		return Report{}, err
@@ -85,7 +86,17 @@ func Collect(ctx context.Context) (Report, error) {
 	}
 
 	client := github.NewClient(token)
-	results := client.Gather(ctx, targets, shared.DefaultConcurrency())
+
+	if opts.Assignee == "@me" {
+		login, err := client.Viewer(ctx)
+		if err != nil {
+			return Report{}, err
+		}
+
+		opts.Assignee = login
+	}
+
+	results := client.Gather(ctx, targets, shared.DefaultConcurrency(), opts)
 
 	return Report{Results: results, Skipped: skipped}, nil
 }

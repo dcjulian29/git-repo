@@ -18,12 +18,12 @@ git-repo is a CLI binary that combines multiple repository git workflows, built 
 | `git-repo init` | Clone missing repos defined in config; skip those that exist |
 | `git-repo status` | Colour-coded table: dirty / push / pull / diverged / untracked |
 | `git-repo sync` | Fetch → pull (rebase + prune + submodules) → push |
-| `git-repo pr list` | List open pull requests across managed GitHub repos (`--json`) |
+| `git-repo pr list` | List pull requests: `--open` (default), `--closed`, `--merged`, `--draft`, `--json` |
 | `git-repo pr open <repo>#<n>` | Open a pull request in the default browser |
 | `git-repo pr show <repo>#<n>` | Show a PR's mergeability, conflicts, checks, and dependabot compatibility |
 | `git-repo pr checkout <repo>#<n>` | Fetch and check out a PR branch in the local clone |
 | `git-repo pr approve <repo>#<n>` | Review a PR, then merge after confirmation (`--method`, `-y`) |
-| `git-repo issue list` | List open issues across managed GitHub repos (`--json`) |
+| `git-repo issue list` | List issues: `--open` (default)/`--closed`/`--all`, `--label`, `--assignee`, `--json` |
 | `git-repo issue open <repo>#<n>` | Open an issue in the default browser |
 | `git-repo issue show <repo>#<n>` | Show an issue's details, labels, and assignees |
 | `git-repo issue triage <repo>#<n>` | Label and assign an issue (prompts when flags omitted) |

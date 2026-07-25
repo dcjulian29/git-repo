@@ -40,6 +40,9 @@ type Item struct {
 
 	// Draft is true when the item is a draft pull request.
 	Draft bool `json:"draft"`
+
+	// Merged is true when the item is a pull request that has been merged.
+	Merged bool `json:"merged"`
 }
 
 // issuePayload mirrors the fields git-repo needs from the GitHub issues API,
@@ -55,7 +58,8 @@ type issuePayload struct {
 		Login string `json:"login"`
 	} `json:"user"`
 	PullRequest *struct {
-		URL string `json:"url"`
+		URL      string     `json:"url"`
+		MergedAt *time.Time `json:"merged_at"`
 	} `json:"pull_request"`
 }
 
@@ -69,5 +73,6 @@ func (p issuePayload) toItem() Item {
 		CreatedAt: p.CreatedAt,
 		IsPull:    p.PullRequest != nil,
 		Draft:     p.Draft,
+		Merged:    p.PullRequest != nil && p.PullRequest.MergedAt != nil,
 	}
 }

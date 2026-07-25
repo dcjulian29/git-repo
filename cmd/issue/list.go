@@ -18,38 +18,49 @@ package issue
 
 import (
 	"context"
-	"os"
 
+	"github.com/dcjulian29/git-repo/internal/github"
 	"github.com/dcjulian29/git-repo/internal/review"
 	"github.com/spf13/cobra"
 )
 
 func listCmd() *cobra.Command {
-	var asJSON bool
+	var (
+		open     bool
+		closed   bool
+		all      bool
+		labels   []string
+		assignee string
+		asJSON   bool
+	)
 
 	cmd := &cobra.Command{
 		Use:   "list",
-		Short: "List open issues across managed repositories",
+		Short: "List issues across managed repositories",
 		Args:  cobra.NoArgs,
 		RunE: func(_ *cobra.Command, _ []string) error {
-			report, err := review.Collect(context.Background())
-			if err != nil {
-				return err
+			state := "open"
+
+			switch {
+			case closed:
+				state = "closed"
+			case all:
+				state = "all"
 			}
 
-			review.PrintWarnings(os.Stderr, report)
+			opts := github.ListOptions{State: state, Labels: labels, Assignee: assignee}
 
-			issues := report.Issues()
-
-			if asJSON {
-				return review.RenderJSON(issues)
-			}
-
-			return review.RenderTable(issues, "ISSUE", "No open issues found.")
+			return review.ListIssues(context.Background(), opts, asJSON)
 		},
 	}
 
+	cmd.Flags().BoolVar(&open, "open", false, "list open issues (default)")
+	cmd.Flags().BoolVar(&closed, "closed", false, "list closed issues")
+	cmd.Flags().BoolVar(&all, "all", false, "list open and closed issues")
+	cmd.Flags().StringSliceVar(&labels, "label", nil, "only issues carrying the given label (repeatable)")
+	cmd.Flags().StringVar(&assignee, "assignee", "", `only issues assigned to this login ("@me" for yourself)`)
 	cmd.Flags().BoolVar(&asJSON, "json", false, "output as JSON")
+	cmd.MarkFlagsMutuallyExclusive("open", "closed", "all")
 
 	return cmd
 }

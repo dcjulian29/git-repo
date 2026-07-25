@@ -18,38 +18,46 @@ package pr
 
 import (
 	"context"
-	"os"
 
 	"github.com/dcjulian29/git-repo/internal/review"
 	"github.com/spf13/cobra"
 )
 
 func listCmd() *cobra.Command {
-	var asJSON bool
+	var (
+		open   bool
+		closed bool
+		merged bool
+		draft  bool
+		asJSON bool
+	)
 
 	cmd := &cobra.Command{
 		Use:   "list",
-		Short: "List open pull requests across managed repositories",
+		Short: "List pull requests across managed repositories",
 		Args:  cobra.NoArgs,
 		RunE: func(_ *cobra.Command, _ []string) error {
-			report, err := review.Collect(context.Background())
-			if err != nil {
-				return err
+			mode := "open"
+
+			switch {
+			case draft:
+				mode = "draft"
+			case closed:
+				mode = "closed"
+			case merged:
+				mode = "merged"
 			}
 
-			review.PrintWarnings(os.Stderr, report)
-
-			pulls := report.PullRequests()
-
-			if asJSON {
-				return review.RenderJSON(pulls)
-			}
-
-			return review.RenderTable(pulls, "PR", "No open pull requests found.")
+			return review.ListPulls(context.Background(), mode, asJSON)
 		},
 	}
 
+	cmd.Flags().BoolVar(&open, "open", false, "list open pull requests (default)")
+	cmd.Flags().BoolVar(&closed, "closed", false, "list closed (unmerged) pull requests")
+	cmd.Flags().BoolVar(&merged, "merged", false, "list merged pull requests")
+	cmd.Flags().BoolVar(&draft, "draft", false, "list draft pull requests")
 	cmd.Flags().BoolVar(&asJSON, "json", false, "output as JSON")
+	cmd.MarkFlagsMutuallyExclusive("open", "closed", "merged", "draft")
 
 	return cmd
 }

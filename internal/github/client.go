@@ -24,6 +24,8 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"strconv"
+	"strings"
 	"time"
 )
 
@@ -50,15 +52,47 @@ func NewClient(token string) *Client {
 	}
 }
 
-// OpenItems returns every open issue and pull request for repo, following
-// pagination. Pull requests are included because the issues endpoint returns
-// them; callers separate the two via Item.IsPull.
-func (c *Client) OpenItems(ctx context.Context, repo Repo) ([]Item, error) {
+// ListOptions filters the items returned by ListItems. The zero value lists
+// open items.
+type ListOptions struct {
+	// State is "open" (the default when empty), "closed", or "all".
+	State string
+
+	// Labels, when set, restricts results to items carrying all of the labels.
+	Labels []string
+
+	// Assignee, when set, restricts results to items assigned to that login
+	// (or the special values "*" for any and "none" for unassigned).
+	Assignee string
+}
+
+// ListItems returns every issue and pull request for repo matching opts,
+// following pagination. Pull requests are included because the issues endpoint
+// returns them; callers separate the two via Item.IsPull.
+func (c *Client) ListItems(ctx context.Context, repo Repo, opts ListOptions) ([]Item, error) {
+	state := opts.State
+	if state == "" {
+		state = "open"
+	}
+
 	var items []Item
 
 	for page := 1; ; page++ {
-		endpoint := fmt.Sprintf("%s/repos/%s/%s/issues?state=open&per_page=%d&page=%d",
-			c.baseURL, url.PathEscape(repo.Owner), url.PathEscape(repo.Name), pageSize, page)
+		query := url.Values{}
+		query.Set("state", state)
+		query.Set("per_page", strconv.Itoa(pageSize))
+		query.Set("page", strconv.Itoa(page))
+
+		if len(opts.Labels) > 0 {
+			query.Set("labels", strings.Join(opts.Labels, ","))
+		}
+
+		if opts.Assignee != "" {
+			query.Set("assignee", opts.Assignee)
+		}
+
+		endpoint := fmt.Sprintf("%s/repos/%s/%s/issues?%s",
+			c.baseURL, url.PathEscape(repo.Owner), url.PathEscape(repo.Name), query.Encode())
 
 		var batch []issuePayload
 		if err := c.doJSON(ctx, http.MethodGet, endpoint, nil, &batch); err != nil {

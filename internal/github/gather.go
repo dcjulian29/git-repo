@@ -44,11 +44,11 @@ type Result struct {
 	Err error
 }
 
-// Gather fetches open items for every target concurrently, bounded by limit,
-// and returns one Result per target in input order.
-func (c *Client) Gather(ctx context.Context, targets []Target, limit int) []Result {
+// Gather fetches items matching opts for every target concurrently, bounded by
+// limit, and returns one Result per target in input order.
+func (c *Client) Gather(ctx context.Context, targets []Target, limit int, opts ListOptions) []Result {
 	return shared.ParallelMap(targets, limit, func(t Target) Result {
-		items, err := c.OpenItems(ctx, t.Repo)
+		items, err := c.ListItems(ctx, t.Repo, opts)
 
 		return Result{Target: t, Items: items, Err: err}
 	})
