@@ -47,20 +47,44 @@ func sampleReport() Report {
 	}
 }
 
-func TestReportPullRequestsSortedOldestFirst(t *testing.T) {
+func TestReportPullRequestsSortedByRepoThenNumber(t *testing.T) {
 	prs := sampleReport().PullRequests()
 
 	if len(prs) != 2 {
 		t.Fatalf("got %d pull requests, want 2", len(prs))
 	}
 
-	// #3 (repoC, 3h old) should sort before #2 (repoA, 1h old).
-	if prs[0].Number != 3 || prs[0].Repo != "repoC" {
-		t.Fatalf("first PR = #%d in %s, want #3 in repoC", prs[0].Number, prs[0].Repo)
+	// Alphabetical by repository: repoA before repoC.
+	if prs[0].Repo != "repoA" || prs[0].Number != 2 {
+		t.Fatalf("first PR = #%d in %s, want #2 in repoA", prs[0].Number, prs[0].Repo)
 	}
 
-	if prs[1].Number != 2 || prs[1].Repo != "repoA" {
-		t.Fatalf("second PR = #%d in %s, want #2 in repoA", prs[1].Number, prs[1].Repo)
+	if prs[1].Repo != "repoC" || prs[1].Number != 3 {
+		t.Fatalf("second PR = #%d in %s, want #3 in repoC", prs[1].Number, prs[1].Repo)
+	}
+}
+
+func TestReportSortsByNumberWithinRepo(t *testing.T) {
+	report := Report{
+		Results: []github.Result{
+			{
+				Target: github.Target{Name: "repoA"},
+				Items: []github.Item{
+					{Number: 10, IsPull: true},
+					{Number: 2, IsPull: true},
+					{Number: 7, IsPull: true},
+				},
+			},
+		},
+	}
+
+	prs := report.PullRequests()
+
+	want := []int{2, 7, 10}
+	for i, w := range want {
+		if prs[i].Number != w {
+			t.Fatalf("position %d = #%d, want #%d (numbers not ascending)", i, prs[i].Number, w)
+		}
 	}
 }
 

@@ -20,6 +20,7 @@ import (
 	"context"
 	"errors"
 	"sort"
+	"strings"
 
 	"github.com/dcjulian29/git-repo/internal/config"
 	"github.com/dcjulian29/git-repo/internal/github"
@@ -89,13 +90,14 @@ func Collect(ctx context.Context) (Report, error) {
 	return Report{Results: results, Skipped: skipped}, nil
 }
 
-// PullRequests returns every open pull request across the report, sorted oldest
-// first.
+// PullRequests returns every open pull request across the report, sorted by
+// repository name and then by number.
 func (r Report) PullRequests() []NamedItem {
 	return r.filter(true)
 }
 
-// Issues returns every open issue across the report, sorted oldest first.
+// Issues returns every open issue across the report, sorted by repository name
+// and then by number.
 func (r Report) Issues() []NamedItem {
 	return r.filter(false)
 }
@@ -114,7 +116,7 @@ func (r Report) Failures() []github.Result {
 }
 
 // filter flattens the successful results into named items of the requested
-// kind, sorted oldest first.
+// kind, sorted by repository name and then by number.
 func (r Report) filter(pull bool) []NamedItem {
 	var items []NamedItem
 
@@ -131,7 +133,12 @@ func (r Report) filter(pull bool) []NamedItem {
 	}
 
 	sort.SliceStable(items, func(i, j int) bool {
-		return items[i].CreatedAt.Before(items[j].CreatedAt)
+		left, right := strings.ToLower(items[i].Repo), strings.ToLower(items[j].Repo)
+		if left != right {
+			return left < right
+		}
+
+		return items[i].Number < items[j].Number
 	})
 
 	return items
