@@ -14,25 +14,27 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-// Package pr contains the sub-commands for working with open pull requests
-// across the managed repositories.
 package pr
 
-import "github.com/spf13/cobra"
+import (
+	"context"
 
-// NewCommand returns the "pr" command group.
-func NewCommand() *cobra.Command {
-	cmd := &cobra.Command{
-		Use:     "pr",
-		Short:   "Work with open pull requests across managed repositories",
-		Aliases: []string{"pulls"},
+	"github.com/dcjulian29/git-repo/internal/review"
+	"github.com/spf13/cobra"
+)
+
+func checkoutCmd() *cobra.Command {
+	return &cobra.Command{
+		Use:   "checkout <repo>#<number>",
+		Short: "Fetch and check out a pull request branch in the local clone",
+		Args:  cobra.ExactArgs(1),
+		RunE: func(_ *cobra.Command, args []string) error {
+			ref, err := review.ParseRef(args[0])
+			if err != nil {
+				return err
+			}
+
+			return review.CheckoutPull(context.Background(), ref)
+		},
 	}
-
-	cmd.AddCommand(approveCmd())
-	cmd.AddCommand(checkoutCmd())
-	cmd.AddCommand(listCmd())
-	cmd.AddCommand(openCmd())
-	cmd.AddCommand(showCmd())
-
-	return cmd
 }

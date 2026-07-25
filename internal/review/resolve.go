@@ -18,11 +18,13 @@ package review
 
 import (
 	"fmt"
+	"path/filepath"
 	"strconv"
 	"strings"
 
 	"github.com/dcjulian29/git-repo/internal/config"
 	"github.com/dcjulian29/git-repo/internal/github"
+	"github.com/dcjulian29/go-toolbox/filesystem"
 )
 
 // Ref identifies a single pull request or issue within a configured repository.
@@ -35,6 +37,10 @@ type Ref struct {
 
 	// Number is the pull-request or issue number.
 	Number int
+
+	// Path is the expected local clone directory, derived from the configured
+	// directory and repository name.
+	Path string
 }
 
 // ParseRef resolves a "<repo>#<number>" handle to a configured github.com
@@ -67,8 +73,25 @@ func ParseRef(handle string) (Ref, error) {
 			return Ref{}, fmt.Errorf("%s is not a github.com repository", repository.Name)
 		}
 
-		return Ref{Name: repository.Name, Repo: repo, Number: number}, nil
+		return Ref{
+			Name:   repository.Name,
+			Repo:   repo,
+			Number: number,
+			Path:   localPath(cfg.Directory, repository.Name),
+		}, nil
 	}
 
 	return Ref{}, fmt.Errorf("repository %q is not in the configuration", name)
+}
+
+// localPath builds the on-disk clone directory for a repository, expanding the
+// configured base directory and splitting names that contain path separators.
+func localPath(directory, name string) string {
+	path := filesystem.ExpandHome(directory)
+
+	for _, segment := range strings.Split(name, "/") {
+		path = filepath.Join(path, segment)
+	}
+
+	return path
 }

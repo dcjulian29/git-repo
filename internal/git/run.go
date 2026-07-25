@@ -14,25 +14,15 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-// Package pr contains the sub-commands for working with open pull requests
-// across the managed repositories.
-package pr
+package git
 
-import "github.com/spf13/cobra"
+import "github.com/dcjulian29/go-toolbox/execute"
 
-// NewCommand returns the "pr" command group.
-func NewCommand() *cobra.Command {
-	cmd := &cobra.Command{
-		Use:     "pr",
-		Short:   "Work with open pull requests across managed repositories",
-		Aliases: []string{"pulls"},
-	}
+// Run executes git with args inside the repository at path, binding the child
+// process to the host terminal so the user sees git's live output. It returns
+// an error when git exits non-zero.
+func Run(path string, args ...string) error {
+	params := append([]string{"-C", path}, args...)
 
-	cmd.AddCommand(approveCmd())
-	cmd.AddCommand(checkoutCmd())
-	cmd.AddCommand(listCmd())
-	cmd.AddCommand(openCmd())
-	cmd.AddCommand(showCmd())
-
-	return cmd
+	return execute.ExternalProgram("git", params...)
 }

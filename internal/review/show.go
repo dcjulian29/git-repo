@@ -24,32 +24,48 @@ import (
 	"github.com/fatih/color"
 )
 
+// newClient resolves a token and returns an authenticated GitHub client.
+func newClient() (*github.Client, error) {
+	token, err := github.Token()
+	if err != nil {
+		return nil, err
+	}
+
+	return github.NewClient(token), nil
+}
+
 // ShowPull fetches and prints the details of a single pull request: metadata,
 // mergeability and conflicts, the dependabot compatibility score when present,
 // and the state of its checks.
 func ShowPull(ctx context.Context, ref Ref) error {
-	token, err := github.Token()
+	client, err := newClient()
 	if err != nil {
 		return err
 	}
 
-	client := github.NewClient(token)
+	_, err = describe(ctx, client, ref)
 
+	return err
+}
+
+// describe fetches a pull request with its checks and compatibility score,
+// renders the summary, and returns the pull request for further action.
+func describe(ctx context.Context, client *github.Client, ref Ref) (github.PullRequest, error) {
 	pull, err := client.GetPull(ctx, ref.Repo, ref.Number)
 	if err != nil {
-		return err
+		return github.PullRequest{}, err
 	}
 
 	checks, err := client.Checks(ctx, ref.Repo, pull.HeadSHA)
 	if err != nil {
-		return err
+		return github.PullRequest{}, err
 	}
 
 	compat := github.CompatibilityScore(ctx, pull.Body)
 
 	renderPull(ref, pull, checks, compat)
 
-	return nil
+	return pull, nil
 }
 
 func renderPull(ref Ref, pull github.PullRequest, checks []github.CheckRun, compat string) {

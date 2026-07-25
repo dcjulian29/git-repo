@@ -61,6 +61,11 @@ type PullRequest struct {
 
 	// URL is the html_url that opens the pull request in a browser.
 	URL string
+
+	// HeadRepo is the "owner/name" of the repository the head branch lives in.
+	// It differs from the base repository when the pull request comes from a
+	// fork.
+	HeadRepo string
 }
 
 // HasConflicts reports whether the pull request has merge conflicts.
@@ -81,8 +86,11 @@ type pullPayload struct {
 		Login string `json:"login"`
 	} `json:"user"`
 	Head struct {
-		Ref string `json:"ref"`
-		SHA string `json:"sha"`
+		Ref  string `json:"ref"`
+		SHA  string `json:"sha"`
+		Repo struct {
+			FullName string `json:"full_name"`
+		} `json:"repo"`
 	} `json:"head"`
 	Base struct {
 		Ref string `json:"ref"`
@@ -112,5 +120,6 @@ func (c *Client) GetPull(ctx context.Context, repo Repo, number int) (PullReques
 		MergeableState: payload.MergeableState,
 		Body:           payload.Body,
 		URL:            payload.HTMLURL,
+		HeadRepo:       payload.Head.Repo.FullName,
 	}, nil
 }
