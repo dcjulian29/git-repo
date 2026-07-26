@@ -18,7 +18,7 @@ package git
 
 import "github.com/fatih/color"
 
-// ColorBool returns a coloured "yes"/"no" string.
+// ColorBool returns a colored "yes"/"no" string.
 // When f is false it always returns green "no".
 // When f is true it returns red "yes" (redOnYes=true) or yellow "yes" (false).
 func ColorBool(f bool, redOnYes bool) string {

@@ -28,7 +28,7 @@ type Label struct {
 	// Name is the label name.
 	Name string
 
-	// Color is the six-character hex colour, without a leading '#'.
+	// Color is the six-character hex color, without a leading '#'.
 	Color string
 
 	// Description is the optional label description.

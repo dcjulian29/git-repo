@@ -38,7 +38,7 @@ func createCmd() *cobra.Command {
 		},
 	}
 
-	cmd.Flags().StringVar(&labelColor, "color", "", "six-character hex colour (defaults to a neutral grey)")
+	cmd.Flags().StringVar(&labelColor, "color", "", "six-character hex color (defaults to a neutral gray)")
 	cmd.Flags().StringVar(&description, "description", "", "label description")
 
 	return cmd

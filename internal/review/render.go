@@ -48,11 +48,11 @@ func PrintWarnings(w io.Writer, report Report) {
 	}
 }
 
-// RenderTable writes items as a colour-coded table. The first column combines
+// RenderTable writes items as a color-coded table. The first column combines
 // the repository name and number into a "<repo>#<number>" handle (the same
-// handle other commands accept), labelled by handleColumn (for example "PR").
+// handle other commands accept), labeled by handleColumn (for example "PR").
 // When showMerge is set, a trailing MERGE column shows each pull request's merge
-// state, coloured green for "clean" and red otherwise. Columns size to their
+// state, colored green for "clean" and red otherwise. Columns size to their
 // content and never wrap; when there are no items it prints emptyMessage.
 func RenderTable(items []NamedItem, handleColumn, emptyMessage string, showMerge bool) error {
 	if len(items) == 0 {
@@ -186,7 +186,7 @@ func mergeStatePlain(state string) string {
 	return state
 }
 
-// colorHandle colours a "<repo>#<number>" handle by merge state: green when
+// colorHandle colors a "<repo>#<number>" handle by merge state: green when
 // clean, red for problem states such as "unstable" or "dirty", yellow when
 // unknown, and the neutral cyan when there is no merge state (issues, or pull
 // requests whose merge state was not fetched).
@@ -203,7 +203,7 @@ func colorHandle(handle, state string) string {
 	}
 }
 
-// colorMergeState returns the merge state coloured green when clean, yellow when
+// colorMergeState returns the merge state colored green when clean, yellow when
 // unknown, and red for any problem state such as "unstable" or "dirty".
 func colorMergeState(state string) string {
 	switch state {

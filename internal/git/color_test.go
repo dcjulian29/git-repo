@@ -30,7 +30,7 @@ const (
 )
 
 // forceColor enables ANSI output for the duration of a test regardless of
-// whether the test output is a terminal, so colour choices can be asserted.
+// whether the test output is a terminal, so color choices can be asserted.
 func forceColor(t *testing.T) {
 	t.Helper()
 
@@ -64,7 +64,7 @@ func TestColorBool(t *testing.T) {
 			}
 
 			if !strings.Contains(got, tt.ansi) {
-				t.Fatalf("expected colour %q in %q", tt.ansi, got)
+				t.Fatalf("expected color %q in %q", tt.ansi, got)
 			}
 		})
 	}
@@ -104,7 +104,7 @@ func TestColorPath(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if got := ColorPath(tt.status); !strings.Contains(got, tt.ansi) {
-				t.Fatalf("expected colour %q in %q", tt.ansi, got)
+				t.Fatalf("expected color %q in %q", tt.ansi, got)
 			}
 		})
 	}

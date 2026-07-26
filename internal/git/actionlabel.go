@@ -18,7 +18,7 @@ package git
 
 import "github.com/fatih/color"
 
-// ActionLabel converts a boolean status flag into a human-readable coloured
+// ActionLabel converts a boolean status flag into a human-readable colored
 // label (e.g. "dirty", "push needed") or an empty string when f is false.
 // When redOnYes is true the label is rendered in red; otherwise yellow.
 func ActionLabel(f bool, label string, redOnYes bool) string {

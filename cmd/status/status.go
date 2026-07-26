@@ -41,7 +41,7 @@ var (
 )
 
 // NewCommand returns a cobra.Command that walks a directory tree and prints a
-// colour-coded table showing the status of every discovered Git repository.
+// color-coded table showing the status of every discovered Git repository.
 func NewCommand() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "status",

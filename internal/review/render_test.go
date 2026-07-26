@@ -47,7 +47,7 @@ func TestColorHandle(t *testing.T) {
 
 	for state, ansi := range cases {
 		if got := colorHandle("git-repo#1", state); !strings.Contains(got, ansi) {
-			t.Fatalf("colorHandle(state=%q) = %q, want colour %q", state, got, ansi)
+			t.Fatalf("colorHandle(state=%q) = %q, want color %q", state, got, ansi)
 		}
 	}
 }

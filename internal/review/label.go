@@ -29,7 +29,7 @@ import (
 	"github.com/olekukonko/tablewriter"
 )
 
-// defaultLabelColor is used when a new label is created without a colour.
+// defaultLabelColor is used when a new label is created without a color.
 const defaultLabelColor = "ededed"
 
 // ListLabels prints the labels defined in the named repository as a table.
