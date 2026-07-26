@@ -128,11 +128,65 @@ func renderChecks(checks []github.CheckRun) {
 		return
 	}
 
-	fmt.Printf("  Checks (%d):\n", len(checks))
+	summaries := aggregateChecks(checks)
+
+	fmt.Printf("  Checks (%d):\n", len(summaries))
+
+	for _, summary := range summaries {
+		symbol, result := checkStatus(summary.run)
+
+		name := summary.run.Name
+		if summary.count > 1 {
+			name = fmt.Sprintf("%s ×%d", name, summary.count)
+		}
+
+		fmt.Printf("    %s %-28s %s\n", symbol, name, result)
+	}
+}
+
+// checkSummary collapses the check runs that share a display name into a single
+// worst-case run and the number of runs that used that name.
+type checkSummary struct {
+	run   github.CheckRun
+	count int
+}
+
+// aggregateChecks groups check runs by name, keeping the worst-case run for each
+// name and counting how many shared it, in first-seen order. GitHub returns a
+// separate run for every leg of a matrix or repeated trigger, so the same name
+// can appear several times; collapsing them keeps the summary readable.
+func aggregateChecks(checks []github.CheckRun) []checkSummary {
+	index := make(map[string]int, len(checks))
+	summaries := make([]checkSummary, 0, len(checks))
 
 	for _, check := range checks {
-		symbol, result := checkStatus(check)
-		fmt.Printf("    %s %-28s %s\n", symbol, check.Name, result)
+		if i, ok := index[check.Name]; ok {
+			summaries[i].count++
+
+			if checkSeverity(check) > checkSeverity(summaries[i].run) {
+				summaries[i].run = check
+			}
+
+			continue
+		}
+
+		index[check.Name] = len(summaries)
+		summaries = append(summaries, checkSummary{run: check, count: 1})
+	}
+
+	return summaries
+}
+
+// checkSeverity ranks a check run so the worst outcome wins when a name repeats:
+// a failure outranks a still-running check, which outranks a success.
+func checkSeverity(check github.CheckRun) int {
+	switch {
+	case check.Completed() && !check.Passed():
+		return 2
+	case !check.Completed():
+		return 1
+	default:
+		return 0
 	}
 }
 
