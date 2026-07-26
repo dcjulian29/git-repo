@@ -17,9 +17,40 @@ limitations under the License.
 package review
 
 import (
+	"strings"
 	"testing"
 	"unicode/utf8"
+
+	"github.com/fatih/color"
 )
+
+func TestColorHandle(t *testing.T) {
+	previous := color.NoColor
+	color.NoColor = false
+
+	t.Cleanup(func() { color.NoColor = previous })
+
+	const (
+		green  = "\x1b[32m"
+		yellow = "\x1b[33m"
+		red    = "\x1b[31m"
+		cyan   = "\x1b[36m"
+	)
+
+	cases := map[string]string{
+		"clean":    green,
+		"unstable": red,
+		"dirty":    red,
+		"unknown":  yellow,
+		"":         cyan,
+	}
+
+	for state, ansi := range cases {
+		if got := colorHandle("git-repo#1", state); !strings.Contains(got, ansi) {
+			t.Fatalf("colorHandle(state=%q) = %q, want colour %q", state, got, ansi)
+		}
+	}
+}
 
 func TestTruncate(t *testing.T) {
 	tests := []struct {

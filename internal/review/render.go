@@ -81,6 +81,7 @@ func RenderTable(items []NamedItem, handleColumn, emptyMessage string, showMerge
 	}
 
 	rows := make([]row, len(items))
+	anyMergeState := false
 
 	for i, item := range items {
 		handle := fmt.Sprintf("%s#%d", item.Repo, item.Number)
@@ -96,6 +97,10 @@ func RenderTable(items []NamedItem, handleColumn, emptyMessage string, showMerge
 		handleWidth = max(handleWidth, utf8.RuneCountInString(handle))
 		authorWidth = max(authorWidth, utf8.RuneCountInString(item.Author))
 		ageWidth = max(ageWidth, utf8.RuneCountInString(age))
+
+		if item.MergeableState != "" {
+			anyMergeState = true
+		}
 
 		if showMerge {
 			mergeWidth = max(mergeWidth, utf8.RuneCountInString(mergeStatePlain(item.MergeableState)))
@@ -139,7 +144,7 @@ func RenderTable(items []NamedItem, handleColumn, emptyMessage string, showMerge
 	table.Header(header)
 
 	for _, r := range rows {
-		cells := []string{color.CyanString(r.handle), r.title, r.author, r.age}
+		cells := []string{colorHandle(r.handle, r.merge), r.title, r.author, r.age}
 		if showMerge {
 			cells = append(cells, colorMergeState(r.merge))
 		}
@@ -149,7 +154,16 @@ func RenderTable(items []NamedItem, handleColumn, emptyMessage string, showMerge
 		}
 	}
 
-	return table.Render()
+	if err := table.Render(); err != nil {
+		return err
+	}
+
+	if showMerge && anyMergeState {
+		fmt.Printf("\n  %s = clean   %s = unknown   %s = unstable\n",
+			color.GreenString("■"), color.YellowString("■"), color.RedString("■"))
+	}
+
+	return nil
 }
 
 // titleBudget returns the width to allow for the title column so that the whole
@@ -170,6 +184,23 @@ func mergeStatePlain(state string) string {
 	}
 
 	return state
+}
+
+// colorHandle colours a "<repo>#<number>" handle by merge state: green when
+// clean, red for problem states such as "unstable" or "dirty", yellow when
+// unknown, and the neutral cyan when there is no merge state (issues, or pull
+// requests whose merge state was not fetched).
+func colorHandle(handle, state string) string {
+	switch state {
+	case "":
+		return color.CyanString(handle)
+	case "clean":
+		return color.GreenString(handle)
+	case "unstable", "dirty", "blocked", "behind":
+		return color.RedString(handle)
+	default:
+		return color.YellowString(handle)
+	}
 }
 
 // colorMergeState returns the merge state coloured green when clean, yellow when
