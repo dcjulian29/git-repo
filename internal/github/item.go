@@ -18,55 +18,59 @@ package github
 
 import "time"
 
-// Item represents a single open issue or pull request.
-type Item struct {
-	// Number is the issue or pull-request number within its repository.
-	Number int `json:"number"`
+type (
+	// Item represents a single open issue or pull request.
+	Item struct {
+		// CreatedAt is the time the item was opened.
+		CreatedAt time.Time `json:"created_at"`
 
-	// Title is the issue or pull-request title.
-	Title string `json:"title"`
+		// Title is the issue or pull-request title.
+		Title string `json:"title"`
 
-	// Author is the login of the user who opened it.
-	Author string `json:"author"`
+		// Author is the login of the user who opened it.
+		Author string `json:"author"`
 
-	// URL is the html_url that opens the item in a browser.
-	URL string `json:"url"`
+		// URL is the html_url that opens the item in a browser.
+		URL string `json:"url"`
 
-	// CreatedAt is the time the item was opened.
-	CreatedAt time.Time `json:"created_at"`
+		// MergeableState is a pull request's coarse merge state ("clean",
+		// "unstable", "dirty", ...). It is populated on demand for pull-request
+		// listings and is empty for issues.
+		MergeableState string `json:"mergeable_state,omitempty"`
 
-	// IsPull is true when the item is a pull request rather than an issue.
-	IsPull bool `json:"is_pull"`
+		// Number is the issue or pull-request number within its repository.
+		Number int `json:"number"`
 
-	// Draft is true when the item is a draft pull request.
-	Draft bool `json:"draft"`
+		// IsPull is true when the item is a pull request rather than an issue.
+		IsPull bool `json:"is_pull"`
 
-	// Merged is true when the item is a pull request that has been merged.
-	Merged bool `json:"merged"`
+		// Draft is true when the item is a draft pull request.
+		Draft bool `json:"draft"`
 
-	// MergeableState is a pull request's coarse merge state ("clean",
-	// "unstable", "dirty", ...). It is populated on demand for pull-request
-	// listings and is empty for issues.
-	MergeableState string `json:"mergeable_state,omitempty"`
-}
+		// Merged is true when the item is a pull request that has been merged.
+		Merged bool `json:"merged"`
+	}
 
-// issuePayload mirrors the fields git-repo needs from the GitHub issues API,
-// which returns both issues and pull requests. Pull requests carry a non-nil
-// pull_request object.
-type issuePayload struct {
-	Number      int       `json:"number"`
-	Title       string    `json:"title"`
-	HTMLURL     string    `json:"html_url"`
-	CreatedAt   time.Time `json:"created_at"`
-	Draft       bool      `json:"draft"`
-	User        struct {
-		Login string `json:"login"`
-	} `json:"user"`
-	PullRequest *struct {
-		URL      string     `json:"url"`
+	// issuePayload mirrors the fields git-repo needs from the GitHub issues API,
+	// which returns both issues and pull requests. Pull requests carry a non-nil
+	// pull_request object.
+	issuePayload struct {
+		CreatedAt   time.Time       `json:"created_at"`
+		PullRequest *pullRefPayload `json:"pull_request"`
+		Title       string          `json:"title"`
+		HTMLURL     string          `json:"html_url"`
+		User        userPayload     `json:"user"`
+		Number      int             `json:"number"`
+		Draft       bool            `json:"draft"`
+	}
+
+	// pullRefPayload is the pull_request object embedded in the issues API
+	// response, present only for pull requests.
+	pullRefPayload struct {
 		MergedAt *time.Time `json:"merged_at"`
-	} `json:"pull_request"`
-}
+		URL      string     `json:"url"`
+	}
+)
 
 // toItem converts a decoded API payload into the exported Item type.
 func (p issuePayload) toItem() Item {

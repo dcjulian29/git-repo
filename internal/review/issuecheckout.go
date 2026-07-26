@@ -62,8 +62,8 @@ func CheckoutIssue(ctx context.Context, ref Ref, branch string, returnToBase boo
 	}
 
 	for _, args := range steps {
-		if err := git.Run(ref.Path, args...); err != nil {
-			return err
+		if runErr := git.Run(ref.Path, args...); runErr != nil {
+			return runErr
 		}
 	}
 

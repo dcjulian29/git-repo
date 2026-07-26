@@ -20,17 +20,9 @@ package config
 // file. Name is used as the local sub-directory name; URL is the remote that
 // will be passed to "git clone".
 type Repository struct {
-	// Name is the local directory name for the cloned repository.
-	Name string `yaml:"name"`
-
-	// URL is the remote Git URL used when cloning.
-	URL string `yaml:"url"`
-
-	// Manage controls whether the pull-request and issue commands operate on
-	// this repository. It defaults to true when omitted; set it to false for
-	// third-party repositories that are cloned but not managed. A nil pointer
-	// is treated as unset and therefore managed.
-	Manage *bool `yaml:"manage,omitempty"`
+	Manage *bool  `yaml:"manage,omitempty"`
+	Name   string `yaml:"name"`
+	URL    string `yaml:"url"`
 }
 
 // Managed reports whether the pull-request and issue commands should operate on

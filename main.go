@@ -20,8 +20,17 @@ limitations under the License.
 // from a YAML configuration into a single binary.
 package main
 
-import "github.com/dcjulian29/git-repo/cmd"
+import (
+	"fmt"
+	"os"
+
+	"github.com/dcjulian29/git-repo/cmd"
+	"github.com/dcjulian29/go-toolbox/textformat"
+)
 
 func main() {
-	cmd.Execute()
+	if err := cmd.Execute(); err != nil {
+		fmt.Fprintln(os.Stderr, "\n"+textformat.Fatal(err.Error()))
+		os.Exit(1)
+	}
 }

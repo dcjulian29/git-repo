@@ -23,22 +23,6 @@ import (
 	"net/url"
 )
 
-// DefaultBranch returns the repository's default branch name.
-func (c *Client) DefaultBranch(ctx context.Context, repo Repo) (string, error) {
-	endpoint := fmt.Sprintf("%s/repos/%s/%s",
-		c.baseURL, url.PathEscape(repo.Owner), url.PathEscape(repo.Name))
-
-	var payload struct {
-		DefaultBranch string `json:"default_branch"`
-	}
-
-	if err := c.doJSON(ctx, http.MethodGet, endpoint, nil, &payload); err != nil {
-		return "", err
-	}
-
-	return payload.DefaultBranch, nil
-}
-
 // CreatePullParams describes a pull request to open.
 type CreatePullParams struct {
 	// Title is the pull-request title.
@@ -55,6 +39,22 @@ type CreatePullParams struct {
 
 	// Draft opens the pull request as a draft when true.
 	Draft bool
+}
+
+// DefaultBranch returns the repository's default branch name.
+func (c *Client) DefaultBranch(ctx context.Context, repo Repo) (string, error) {
+	endpoint := fmt.Sprintf("%s/repos/%s/%s",
+		c.baseURL, url.PathEscape(repo.Owner), url.PathEscape(repo.Name))
+
+	var payload struct {
+		DefaultBranch string `json:"default_branch"`
+	}
+
+	if err := c.doJSON(ctx, http.MethodGet, endpoint, nil, &payload); err != nil {
+		return "", err
+	}
+
+	return payload.DefaultBranch, nil
 }
 
 // CreatePull opens a new pull request and returns it.

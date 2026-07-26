@@ -34,8 +34,8 @@ func TestMarkPullReadySendsMutation(t *testing.T) {
 		body, _ := io.ReadAll(r.Body)
 
 		var payload struct {
-			Query     string         `json:"query"`
 			Variables map[string]any `json:"variables"`
+			Query     string         `json:"query"`
 		}
 		_ = json.Unmarshal(body, &payload)
 

@@ -18,10 +18,10 @@ limitations under the License.
 package status
 
 import (
+	"cmp"
 	"errors"
 	"fmt"
-	"sort"
-	"strings"
+	"slices"
 
 	"github.com/dcjulian29/git-repo/internal/cli"
 	"github.com/dcjulian29/git-repo/internal/config"
@@ -63,33 +63,13 @@ func NewCommand() *cobra.Command {
 
 			root := filesystem.ExpandHome(cfg.Directory)
 
-			spinner, err := shared.NewSpinner()
+			results, err := collectStatuses(root)
 			if err != nil {
-				return fmt.Errorf("failed to create spinner: %w", err)
+				return err
 			}
 
-			_ = spinner.Start()
-
-			dirs, err := git.FindGitRepositories(root)
-			if err != nil {
-				_ = spinner.Stop()
-				return fmt.Errorf("failed to walk directory: %w", err)
-			}
-
-			statuses := shared.ParallelMap(dirs, shared.DefaultConcurrency(), git.ComputeStatus)
-
-			_ = spinner.Stop()
-
-			var results []git.RepoStatus
-
-			for _, s := range statuses {
-				if filter(s) {
-					results = append(results, s)
-				}
-			}
-
-			sort.Slice(results, func(i, j int) bool {
-				return strings.Compare(results[i].Folder, results[j].Folder) < 0
+			slices.SortFunc(results, func(a, b git.RepoStatus) int {
+				return cmp.Compare(a.Folder, b.Folder)
 			})
 
 			render(results)
@@ -107,4 +87,37 @@ func NewCommand() *cobra.Command {
 	cmd.Flags().BoolVar(&noUpstream, "no-upstream", false, "show only repositories with no upstream tracking branch")
 
 	return cmd
+}
+
+// collectStatuses walks root for Git repositories, computes their status in
+// parallel while a spinner is shown, and returns the statuses that pass the
+// active filters.
+func collectStatuses(root string) ([]git.RepoStatus, error) {
+	spinner, err := shared.NewSpinner()
+	if err != nil {
+		return nil, fmt.Errorf("failed to create spinner: %w", err)
+	}
+
+	_ = spinner.Start()
+
+	dirs, err := git.FindGitRepositories(root)
+	if err != nil {
+		_ = spinner.Stop()
+
+		return nil, fmt.Errorf("failed to walk directory: %w", err)
+	}
+
+	statuses := shared.ParallelMap(dirs, shared.DefaultConcurrency(), git.ComputeStatus)
+
+	_ = spinner.Stop()
+
+	var results []git.RepoStatus
+
+	for _, s := range statuses {
+		if filter(s) {
+			results = append(results, s)
+		}
+	}
+
+	return results, nil
 }

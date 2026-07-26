@@ -58,13 +58,13 @@ func TestParallelMapRespectsLimit(t *testing.T) {
 	}
 
 	var (
-		inflight    int64
+		inflight    atomic.Int64
 		maxInflight int64
 		mu          sync.Mutex
 	)
 
 	ParallelMap(inputs, limit, func(s string) string {
-		n := atomic.AddInt64(&inflight, 1)
+		n := inflight.Add(1)
 
 		mu.Lock()
 		if n > maxInflight {
@@ -73,7 +73,7 @@ func TestParallelMapRespectsLimit(t *testing.T) {
 		mu.Unlock()
 
 		time.Sleep(10 * time.Millisecond)
-		atomic.AddInt64(&inflight, -1)
+		inflight.Add(-1)
 
 		return s
 	})

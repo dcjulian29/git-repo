@@ -55,27 +55,37 @@ func TriageIssue(ctx context.Context, ref Ref, label, assignee string) error {
 	}
 
 	if label != "" {
-		if err := client.AddLabels(ctx, ref.Repo, ref.Number, []string{label}); err != nil {
-			return err
+		if labelErr := client.AddLabels(ctx, ref.Repo, ref.Number, []string{label}); labelErr != nil {
+			return labelErr
 		}
 
 		fmt.Println(color.GreenString("Added label %q.", label))
 	}
 
+	return applyAssignee(ctx, client, ref, assignee)
+}
+
+// applyAssignee assigns assignee to the issue, prompting for a login when it is
+// empty. A blank assignee (however supplied) leaves the issue unassigned.
+func applyAssignee(ctx context.Context, client *github.Client, ref Ref, assignee string) error {
 	if assignee == "" {
-		assignee, err = shared.Prompt(os.Stdin, os.Stdout, "Assignee (login, blank to skip): ")
+		answer, err := shared.Prompt(os.Stdin, os.Stdout, "Assignee (login, blank to skip): ")
 		if err != nil {
 			return err
 		}
+
+		assignee = answer
 	}
 
-	if assignee != "" {
-		if err := client.AddAssignees(ctx, ref.Repo, ref.Number, []string{assignee}); err != nil {
-			return err
-		}
-
-		fmt.Println(color.GreenString("Assigned to %s.", assignee))
+	if assignee == "" {
+		return nil
 	}
+
+	if err := client.AddAssignees(ctx, ref.Repo, ref.Number, []string{assignee}); err != nil {
+		return err
+	}
+
+	fmt.Println(color.GreenString("Assigned to %s.", assignee))
 
 	return nil
 }

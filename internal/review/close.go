@@ -31,5 +31,5 @@ func CloseIssue(ctx context.Context, ref Ref, comment string, skipConfirm bool) 
 		return err
 	}
 
-	return closeIssue(ctx, client, ref, comment, "completed", "completed", skipConfirm)
+	return performClose(ctx, client, ref, comment, "completed", "completed", skipConfirm)
 }

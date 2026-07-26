@@ -20,9 +20,6 @@ limitations under the License.
 package cmd
 
 import (
-	"fmt"
-	"os"
-
 	"github.com/dcjulian29/git-repo/cmd/config"
 	"github.com/dcjulian29/git-repo/cmd/initialize"
 	"github.com/dcjulian29/git-repo/cmd/issue"
@@ -30,7 +27,6 @@ import (
 	"github.com/dcjulian29/git-repo/cmd/pr"
 	"github.com/dcjulian29/git-repo/cmd/status"
 	"github.com/dcjulian29/git-repo/cmd/synchronize"
-	"github.com/dcjulian29/go-toolbox/textformat"
 	"github.com/spf13/cobra"
 	"go.szostok.io/version/extension"
 )
@@ -45,21 +41,6 @@ local Git repositories declared in ~/.config/git-repo.yml.`,
 	SilenceUsage:  true,
 }
 
-// Execute is the entry-point called by main. It builds the command tree and
-// runs the appropriate sub-command based on os.Args.
-func Execute() {
-	rootCmd.AddCommand(
-		extension.NewVersionCobraCmd(
-			extension.WithUpgradeNotice("dcjulian29", "git-repo"),
-		),
-	)
-
-	if err := rootCmd.Execute(); err != nil {
-		fmt.Fprintln(os.Stderr, "\n"+textformat.Fatal(err.Error()))
-		os.Exit(1)
-	}
-}
-
 func init() {
 	rootCmd.AddCommand(config.NewCommand())
 	rootCmd.AddCommand(initialize.NewCommand())
@@ -68,4 +49,17 @@ func init() {
 	rootCmd.AddCommand(pr.NewCommand())
 	rootCmd.AddCommand(status.NewCommand())
 	rootCmd.AddCommand(synchronize.NewCommand())
+}
+
+// Execute is the entry-point called by main. It builds the command tree and
+// runs the appropriate sub-command based on os.Args. On failure it returns the
+// error so that the caller can report it and set the process exit code.
+func Execute() error {
+	rootCmd.AddCommand(
+		extension.NewVersionCobraCmd(
+			extension.WithUpgradeNotice("dcjulian29", "git-repo"),
+		),
+	)
+
+	return rootCmd.Execute()
 }

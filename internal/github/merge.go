@@ -24,6 +24,8 @@ import (
 )
 
 // MergeMethods lists the merge methods GitHub accepts.
+//
+//nolint:gochecknoglobals // exported list of allowed merge methods; a slice cannot be const
 var MergeMethods = []string{"merge", "squash", "rebase"}
 
 // MergePull merges the given pull request using method (one of MergeMethods).

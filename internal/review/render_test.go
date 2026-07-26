@@ -56,15 +56,15 @@ func TestTruncate(t *testing.T) {
 	tests := []struct {
 		name string
 		in   string
-		max  int
 		want string
+		max  int
 	}{
-		{"fits", "hello", 10, "hello"},
-		{"exact", "hello", 5, "hello"},
-		{"truncated with ellipsis", "hello world", 8, "hello w…"},
-		{"single column", "hello", 1, "…"},
-		{"zero column", "hello", 0, ""},
-		{"unicode runes", "日本語テスト", 3, "日本…"},
+		{name: "fits", in: "hello", max: 10, want: "hello"},
+		{name: "exact", in: "hello", max: 5, want: "hello"},
+		{name: "truncated with ellipsis", in: "hello world", max: 8, want: "hello w…"},
+		{name: "single column", in: "hello", max: 1, want: "…"},
+		{name: "zero column", in: "hello", max: 0, want: ""},
+		{name: "unicode runes", in: "日本語テスト", max: 3, want: "日本…"},
 	}
 
 	for _, tt := range tests {

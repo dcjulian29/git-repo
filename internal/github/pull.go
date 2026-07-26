@@ -23,84 +23,61 @@ import (
 	"net/url"
 )
 
-// PullRequest holds the details git-repo needs to review a single pull request.
-type PullRequest struct {
-	// Number is the pull-request number.
-	Number int
+type (
+	// PullRequest holds the details git-repo needs to review a single pull request.
+	PullRequest struct {
+		Mergeable      *bool
+		Author         string
+		Title          string
+		State          string
+		HeadRef        string
+		HeadSHA        string
+		BaseRef        string
+		NodeID         string
+		MergeableState string
+		Body           string
+		URL            string
+		HeadRepo       string
+		Number         int
+		Draft          bool
+	}
 
-	// NodeID is the GraphQL global node ID, needed for GraphQL-only mutations
-	// such as marking a draft ready for review.
-	NodeID string
+	// headPayload is the head branch reference of a pull request.
+	headPayload struct {
+		Ref  string      `json:"ref"`
+		SHA  string      `json:"sha"`
+		Repo repoPayload `json:"repo"`
+	}
 
-	// Title is the pull-request title.
-	Title string
+	// repoPayload identifies the repository a branch lives in.
+	repoPayload struct {
+		FullName string `json:"full_name"`
+	}
 
-	// Author is the login of the user who opened it.
-	Author string
+	// basePayload is the base branch reference of a pull request.
+	basePayload struct {
+		Ref string `json:"ref"`
+	}
 
-	// State is the pull-request state (for example "open").
-	State string
-
-	// Draft is true when the pull request is a draft.
-	Draft bool
-
-	// HeadRef is the source branch name.
-	HeadRef string
-
-	// HeadSHA is the head commit SHA, used to look up checks.
-	HeadSHA string
-
-	// BaseRef is the target branch name.
-	BaseRef string
-
-	// Mergeable is GitHub's mergeability verdict; nil means it is still being
-	// computed.
-	Mergeable *bool
-
-	// MergeableState is a coarse label such as "clean", "dirty" (conflicts),
-	// "blocked", "behind", or "unstable".
-	MergeableState string
-
-	// Body is the pull-request description.
-	Body string
-
-	// URL is the html_url that opens the pull request in a browser.
-	URL string
-
-	// HeadRepo is the "owner/name" of the repository the head branch lives in.
-	// It differs from the base repository when the pull request comes from a
-	// fork.
-	HeadRepo string
-}
+	pullPayload struct {
+		Mergeable      *bool       `json:"mergeable"`
+		Head           headPayload `json:"head"`
+		NodeID         string      `json:"node_id"`
+		Title          string      `json:"title"`
+		State          string      `json:"state"`
+		Body           string      `json:"body"`
+		HTMLURL        string      `json:"html_url"`
+		MergeableState string      `json:"mergeable_state"`
+		User           userPayload `json:"user"`
+		Base           basePayload `json:"base"`
+		Number         int         `json:"number"`
+		Draft          bool        `json:"draft"`
+	}
+)
 
 // HasConflicts reports whether the pull request has merge conflicts.
 func (p PullRequest) HasConflicts() bool {
 	return p.MergeableState == "dirty" || (p.Mergeable != nil && !*p.Mergeable)
-}
-
-type pullPayload struct {
-	Number         int    `json:"number"`
-	NodeID         string `json:"node_id"`
-	Title          string `json:"title"`
-	State          string `json:"state"`
-	Draft          bool   `json:"draft"`
-	Body           string `json:"body"`
-	HTMLURL        string `json:"html_url"`
-	Mergeable      *bool  `json:"mergeable"`
-	MergeableState string `json:"mergeable_state"`
-	User           struct {
-		Login string `json:"login"`
-	} `json:"user"`
-	Head struct {
-		Ref  string `json:"ref"`
-		SHA  string `json:"sha"`
-		Repo struct {
-			FullName string `json:"full_name"`
-		} `json:"repo"`
-	} `json:"head"`
-	Base struct {
-		Ref string `json:"ref"`
-	} `json:"base"`
 }
 
 // GetPull fetches the details of a single pull request.

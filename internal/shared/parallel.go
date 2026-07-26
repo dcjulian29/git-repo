@@ -27,15 +27,9 @@ import (
 // total is capped to avoid overwhelming the host or tripping remote rate
 // limits when many repositories are managed.
 func DefaultConcurrency() int {
-	n := runtime.NumCPU() * 2
+	n := max(runtime.NumCPU()*2, 4)
 
-	if n < 4 {
-		n = 4
-	}
-
-	if n > 16 {
-		n = 16
-	}
+	n = min(n, 16)
 
 	return n
 }
@@ -56,16 +50,12 @@ func ParallelMap[I, O any](inputs []I, limit int, fn func(I) O) []O {
 	sem := make(chan struct{}, limit)
 
 	for i, in := range inputs {
-		wg.Add(1)
-
-		go func(i int, in I) {
-			defer wg.Done()
-
+		wg.Go(func() {
 			sem <- struct{}{}
 			defer func() { <-sem }()
 
 			results[i] = fn(in)
-		}(i, in)
+		})
 	}
 
 	wg.Wait()

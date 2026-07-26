@@ -29,18 +29,10 @@ import (
 
 // Ref identifies a single pull request or issue within a configured repository.
 type Ref struct {
-	// Name is the configuration name of the repository.
-	Name string
-
-	// Repo is the parsed GitHub owner and name.
-	Repo github.Repo
-
-	// Number is the pull-request or issue number.
+	Repo   github.Repo
+	Name   string
+	Path   string
 	Number int
-
-	// Path is the expected local clone directory, derived from the configured
-	// directory and repository name.
-	Path string
 }
 
 // ParseRef resolves a "<repo>#<number>" handle to a configured github.com
@@ -113,7 +105,7 @@ func ResolveRepo(name string) (string, github.Repo, error) {
 func localPath(directory, name string) string {
 	path := filesystem.ExpandHome(directory)
 
-	for _, segment := range strings.Split(name, "/") {
+	for segment := range strings.SplitSeq(name, "/") {
 		path = filepath.Join(path, segment)
 	}
 

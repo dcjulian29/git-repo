@@ -29,19 +29,29 @@ import (
 	"time"
 )
 
+// Client is a minimal GitHub REST client scoped to the endpoints git-repo
+// needs. The zero value is not usable; construct one with NewClient.
+type (
+	Client struct {
+		http    *http.Client
+		token   string
+		baseURL string
+	}
+
+	// ListOptions filters the items returned by ListItems. The zero value lists
+	// open items.
+	ListOptions struct {
+		State    string
+		Assignee string
+		Labels   []string
+	}
+)
+
 const (
 	defaultBaseURL = "https://api.github.com"
 	pageSize       = 100
 	requestTimeout = 30 * time.Second
 )
-
-// Client is a minimal GitHub REST client scoped to the endpoints git-repo
-// needs. The zero value is not usable; construct one with NewClient.
-type Client struct {
-	token   string
-	baseURL string
-	http    *http.Client
-}
 
 // NewClient returns a Client that authenticates requests with the given token.
 func NewClient(token string) *Client {
@@ -50,20 +60,6 @@ func NewClient(token string) *Client {
 		baseURL: defaultBaseURL,
 		http:    &http.Client{Timeout: requestTimeout},
 	}
-}
-
-// ListOptions filters the items returned by ListItems. The zero value lists
-// open items.
-type ListOptions struct {
-	// State is "open" (the default when empty), "closed", or "all".
-	State string
-
-	// Labels, when set, restricts results to items carrying all of the labels.
-	Labels []string
-
-	// Assignee, when set, restricts results to items assigned to that login
-	// (or the special values "*" for any and "none" for unassigned).
-	Assignee string
 }
 
 // ListItems returns every issue and pull request for repo matching opts,
@@ -126,7 +122,7 @@ func (c *Client) doJSON(ctx context.Context, method, endpoint string, body, out 
 		reader = bytes.NewReader(data)
 	}
 
-	req, err := http.NewRequestWithContext(ctx, method, endpoint, reader) //nolint:gosec // G107: endpoint is built from the fixed api base and URL-escaped path
+	req, err := http.NewRequestWithContext(ctx, method, endpoint, reader) //nolint:gosec // fixed base, escaped path
 	if err != nil {
 		return err
 	}

@@ -31,5 +31,5 @@ func RejectIssue(ctx context.Context, ref Ref, comment string, skipConfirm bool)
 		return err
 	}
 
-	return closeIssue(ctx, client, ref, comment, "not_planned", "not planned", skipConfirm)
+	return performClose(ctx, client, ref, comment, "not_planned", "not planned", skipConfirm)
 }

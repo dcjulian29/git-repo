@@ -59,7 +59,8 @@ func ListLabels(ctx context.Context, repoName string) error {
 	table.Header([]string{"NAME", "COLOR", "DESCRIPTION"})
 
 	for _, label := range labels {
-		if err := table.Append([]string{color.CyanString(label.Name), "#" + label.Color, label.Description}); err != nil {
+		row := []string{color.CyanString(label.Name), "#" + label.Color, label.Description}
+		if err := table.Append(row); err != nil {
 			return err
 		}
 	}

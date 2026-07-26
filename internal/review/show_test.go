@@ -48,13 +48,13 @@ func TestAggregateChecks(t *testing.T) {
 
 	want := []struct {
 		name       string
-		count      int
 		conclusion string
 		status     string
+		count      int
 	}{
-		{"lint", 3, "failure", "completed"}, // worst-case run wins
-		{"build", 2, "success", "completed"},
-		{"test", 1, "", "in_progress"},
+		{name: "lint", count: 3, conclusion: "failure", status: "completed"}, // worst-case run wins
+		{name: "build", count: 2, conclusion: "success", status: "completed"},
+		{name: "test", count: 1, conclusion: "", status: "in_progress"},
 	}
 
 	for i, w := range want {

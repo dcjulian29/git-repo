@@ -25,7 +25,7 @@ import (
 func OpenBrowser(rawURL string) error {
 	name, args := browserCommand(runtime.GOOS, rawURL)
 
-	return exec.Command(name, args...).Start() //nolint:gosec // G204: launcher is a fixed per-OS command; only the URL varies
+	return exec.Command(name, args...).Start() //nolint:gosec // G204: fixed per-OS launcher; only URL varies
 }
 
 // browserCommand returns the launcher and arguments used to open a URL on the

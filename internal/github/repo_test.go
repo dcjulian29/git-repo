@@ -54,7 +54,9 @@ func TestCreatePull(t *testing.T) {
 		var payload map[string]any
 		_ = json.Unmarshal(body, &payload)
 
-		if payload["head"] != "issue/8" || payload["base"] != "main" || payload["draft"] != true {
+		draft, ok := payload["draft"].(bool)
+
+		if payload["head"] != "issue/8" || payload["base"] != "main" || !ok || !draft {
 			t.Errorf("create body = %v", payload)
 		}
 

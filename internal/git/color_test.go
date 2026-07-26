@@ -45,14 +45,14 @@ func TestColorBool(t *testing.T) {
 
 	tests := []struct {
 		name     string
-		value    bool
-		redOnYes bool
 		text     string
 		ansi     string
+		value    bool
+		redOnYes bool
 	}{
-		{"false is green no", false, true, "no", ansiGreen},
-		{"true red on yes", true, true, "yes", ansiRed},
-		{"true yellow on yes", true, false, "yes", ansiYellow},
+		{name: "false is green no", value: false, redOnYes: true, text: "no", ansi: ansiGreen},
+		{name: "true red on yes", value: true, redOnYes: true, text: "yes", ansi: ansiRed},
+		{name: "true yellow on yes", value: true, redOnYes: false, text: "yes", ansi: ansiYellow},
 	}
 
 	for _, tt := range tests {
@@ -91,14 +91,14 @@ func TestColorPath(t *testing.T) {
 
 	tests := []struct {
 		name   string
-		status RepoStatus
 		ansi   string
+		status RepoStatus
 	}{
-		{"clean is green", RepoStatus{Folder: "/r"}, ansiGreen},
-		{"dirty is yellow", RepoStatus{Folder: "/r", Dirty: true}, ansiYellow},
-		{"no upstream is yellow", RepoStatus{Folder: "/r", NoUpstream: true}, ansiYellow},
-		{"push needed is red", RepoStatus{Folder: "/r", PushNeeded: true}, ansiRed},
-		{"pull needed is red", RepoStatus{Folder: "/r", PullNeeded: true}, ansiRed},
+		{name: "clean is green", status: RepoStatus{Folder: "/r"}, ansi: ansiGreen},
+		{name: "dirty is yellow", status: RepoStatus{Folder: "/r", Dirty: true}, ansi: ansiYellow},
+		{name: "no upstream is yellow", status: RepoStatus{Folder: "/r", NoUpstream: true}, ansi: ansiYellow},
+		{name: "push needed is red", status: RepoStatus{Folder: "/r", PushNeeded: true}, ansi: ansiRed},
+		{name: "pull needed is red", status: RepoStatus{Folder: "/r", PullNeeded: true}, ansi: ansiRed},
 	}
 
 	for _, tt := range tests {

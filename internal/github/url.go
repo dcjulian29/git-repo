@@ -35,20 +35,20 @@ func (r Repo) String() string {
 	return r.Owner + "/" + r.Name
 }
 
-// prefixes maps the accepted github.com remote URL prefixes to strip before
-// parsing the owner and name.
-var githubPrefixes = []string{
-	"git@github.com:",
-	"ssh://git@github.com/",
-	"https://github.com/",
-	"http://github.com/",
-}
-
 // ParseRepo extracts the owner and name from a GitHub remote URL. It accepts
 // both HTTPS ("https://github.com/owner/name.git") and SSH
 // ("git@github.com:owner/name.git") forms. It returns an error for URLs that
 // are not hosted on github.com, so callers can skip third-party hosts.
 func ParseRepo(remote string) (Repo, error) {
+	// githubPrefixes are the accepted github.com remote URL prefixes to strip
+	// before parsing the owner and name.
+	githubPrefixes := []string{
+		"git@github.com:",
+		"ssh://git@github.com/",
+		"https://github.com/",
+		"http://github.com/", //nolint:revive // git remotes may legitimately use http
+	}
+
 	trimmed := strings.TrimSpace(remote)
 
 	path := ""

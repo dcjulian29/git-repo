@@ -26,8 +26,8 @@ const (
 )
 
 var (
-	instance  *Configuration
-	loadError error
-	mutex     sync.RWMutex
-	once      sync.Once
+	instance  *Configuration //nolint:gochecknoglobals // lazy-loaded configuration singleton
+	loadError error          //nolint:gochecknoglobals // lazy-loaded configuration singleton
+	mutex     sync.RWMutex   //nolint:gochecknoglobals // lazy-loaded configuration singleton
+	once      sync.Once      //nolint:gochecknoglobals // lazy-loaded configuration singleton
 )

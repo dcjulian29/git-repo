@@ -37,7 +37,7 @@ func useTempHome(t *testing.T) string {
 func TestLoadMissingFileReturnsEmptyConfig(t *testing.T) {
 	useTempHome(t)
 
-	cfg, err := load()
+	cfg, err := loadFromDisk()
 	if err != nil {
 		t.Fatalf("unexpected error loading absent config: %v", err)
 	}
@@ -66,7 +66,7 @@ func TestSaveThenLoadRoundTrip(t *testing.T) {
 		t.Fatalf("Save failed: %v", err)
 	}
 
-	got, err := load()
+	got, err := loadFromDisk()
 	if err != nil {
 		t.Fatalf("load after save failed: %v", err)
 	}

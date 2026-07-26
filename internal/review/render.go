@@ -32,6 +32,26 @@ import (
 	"golang.org/x/term"
 )
 
+type (
+	// tableRow holds the plain-text cells for one item, before coloring.
+	tableRow struct {
+		handle string
+		title  string
+		author string
+		age    string
+		merge  string
+	}
+
+	// columnWidths records the natural (plain-text) width of every non-title
+	// column, from which the title budget is derived.
+	columnWidths struct {
+		handle int
+		author int
+		age    int
+		merge  int
+	}
+)
+
 // minTitleWidth is the smallest width the title column is shrunk to before the
 // table is allowed to exceed a narrow terminal.
 const minTitleWidth = 12
@@ -61,68 +81,11 @@ func RenderTable(items []NamedItem, handleColumn, emptyMessage string, showMerge
 		return nil
 	}
 
-	type row struct {
-		handle string
-		title  string
-		author string
-		age    string
-		merge  string
-	}
-
-	// Track the natural (plain-text) width of every column so the title budget
-	// can be derived from what the other columns actually need.
-	handleWidth := utf8.RuneCountInString(handleColumn)
-	authorWidth := utf8.RuneCountInString("AUTHOR")
-	ageWidth := utf8.RuneCountInString("AGE")
-	mergeWidth := 0
-
-	if showMerge {
-		mergeWidth = utf8.RuneCountInString("MERGE")
-	}
-
-	rows := make([]row, len(items))
-	anyMergeState := false
-
-	for i, item := range items {
-		handle := fmt.Sprintf("%s#%d", item.Repo, item.Number)
-
-		title := item.Title
-		if item.Draft {
-			title += " (draft)"
-		}
-
-		age := shared.Age(time.Since(item.CreatedAt))
-		rows[i] = row{handle: handle, title: title, author: item.Author, age: age, merge: item.MergeableState}
-
-		handleWidth = max(handleWidth, utf8.RuneCountInString(handle))
-		authorWidth = max(authorWidth, utf8.RuneCountInString(item.Author))
-		ageWidth = max(ageWidth, utf8.RuneCountInString(age))
-
-		if item.MergeableState != "" {
-			anyMergeState = true
-		}
-
-		if showMerge {
-			mergeWidth = max(mergeWidth, utf8.RuneCountInString(mergeStatePlain(item.MergeableState)))
-		}
-	}
+	rows, widths, anyMergeState := buildTableRows(items, handleColumn, showMerge)
 
 	// When writing to a terminal, cap the title column to the remaining width so
 	// the whole table fits on one line; otherwise leave titles intact.
-	if width, ok := terminalWidth(); ok {
-		columns := 4
-		otherWidth := handleWidth + authorWidth + ageWidth
-
-		if showMerge {
-			columns = 5
-			otherWidth += mergeWidth
-		}
-
-		titleWidth := titleBudget(width, otherWidth, columns)
-		for i := range rows {
-			rows[i].title = truncate(rows[i].title, titleWidth)
-		}
-	}
+	applyTitleBudget(rows, widths, showMerge)
 
 	table := tablewriter.NewTable(os.Stdout,
 		tablewriter.WithConfig(tablewriter.Config{
@@ -164,6 +127,74 @@ func RenderTable(items []NamedItem, handleColumn, emptyMessage string, showMerge
 	}
 
 	return nil
+}
+
+// buildTableRows converts items into plain-text rows and records the natural
+// width of every non-title column so the title budget can be derived from what
+// the other columns actually need. anyMergeState reports whether any item
+// carried a merge state, which controls whether the legend is printed.
+func buildTableRows(items []NamedItem, handleColumn string, showMerge bool) ([]tableRow, columnWidths, bool) {
+	widths := columnWidths{
+		handle: utf8.RuneCountInString(handleColumn),
+		author: utf8.RuneCountInString("AUTHOR"),
+		age:    utf8.RuneCountInString("AGE"),
+	}
+
+	if showMerge {
+		widths.merge = utf8.RuneCountInString("MERGE")
+	}
+
+	rows := make([]tableRow, len(items))
+	anyMergeState := false
+
+	for i, item := range items {
+		handle := fmt.Sprintf("%s#%d", item.Repo, item.Number)
+
+		title := item.Title
+		if item.Draft {
+			title += " (draft)"
+		}
+
+		age := shared.Age(time.Since(item.CreatedAt))
+		rows[i] = tableRow{handle: handle, title: title, author: item.Author, age: age, merge: item.MergeableState}
+
+		widths.handle = max(widths.handle, utf8.RuneCountInString(handle))
+		widths.author = max(widths.author, utf8.RuneCountInString(item.Author))
+		widths.age = max(widths.age, utf8.RuneCountInString(age))
+
+		if item.MergeableState != "" {
+			anyMergeState = true
+		}
+
+		if showMerge {
+			widths.merge = max(widths.merge, utf8.RuneCountInString(mergeStatePlain(item.MergeableState)))
+		}
+	}
+
+	return rows, widths, anyMergeState
+}
+
+// applyTitleBudget caps each row's title to the width that keeps the whole table
+// within the terminal, when stdout is a terminal. When stdout is not a terminal
+// the titles are left intact.
+func applyTitleBudget(rows []tableRow, widths columnWidths, showMerge bool) {
+	width, ok := terminalWidth()
+	if !ok {
+		return
+	}
+
+	columns := 4
+	otherWidth := widths.handle + widths.author + widths.age
+
+	if showMerge {
+		columns = 5
+		otherWidth += widths.merge
+	}
+
+	titleWidth := titleBudget(width, otherWidth, columns)
+	for i := range rows {
+		rows[i].title = truncate(rows[i].title, titleWidth)
+	}
 }
 
 // titleBudget returns the width to allow for the title column so that the whole

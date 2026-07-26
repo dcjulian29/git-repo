@@ -23,19 +23,28 @@ import (
 	"net/url"
 )
 
-// CheckRun is a single CI check on a commit.
-type CheckRun struct {
-	// Name is the check's display name.
-	Name string
+type (
+	// CheckRun is a single CI check on a commit.
+	CheckRun struct {
+		// Name is the check's display name.
+		Name string
 
-	// Status is the run status: "queued", "in_progress", or "completed".
-	Status string
+		// Status is the run status: "queued", "in_progress", or "completed".
+		Status string
 
-	// Conclusion is the result once completed: "success", "failure",
-	// "neutral", "cancelled", "timed_out", "action_required", or "skipped".
-	// It is empty while the check is still running.
-	Conclusion string
-}
+		// Conclusion is the result once completed: "success", "failure",
+		// "neutral", "cancelled", "timed_out", "action_required", or "skipped".
+		// It is empty while the check is still running.
+		Conclusion string
+	}
+
+	// checkRunPayload mirrors a single entry in the check-runs API response.
+	checkRunPayload struct {
+		Name       string `json:"name"`
+		Status     string `json:"status"`
+		Conclusion string `json:"conclusion"`
+	}
+)
 
 // Completed reports whether the check has finished running.
 func (r CheckRun) Completed() bool {
@@ -58,11 +67,7 @@ func (c *Client) Checks(ctx context.Context, repo Repo, sha string) ([]CheckRun,
 		c.baseURL, url.PathEscape(repo.Owner), url.PathEscape(repo.Name), url.PathEscape(sha), pageSize)
 
 	var payload struct {
-		CheckRuns []struct {
-			Name       string `json:"name"`
-			Status     string `json:"status"`
-			Conclusion string `json:"conclusion"`
-		} `json:"check_runs"`
+		CheckRuns []checkRunPayload `json:"check_runs"`
 	}
 
 	if err := c.doJSON(ctx, http.MethodGet, endpoint, nil, &payload); err != nil {
@@ -71,7 +76,7 @@ func (c *Client) Checks(ctx context.Context, repo Repo, sha string) ([]CheckRun,
 
 	runs := make([]CheckRun, len(payload.CheckRuns))
 	for i, run := range payload.CheckRuns {
-		runs[i] = CheckRun{Name: run.Name, Status: run.Status, Conclusion: run.Conclusion}
+		runs[i] = CheckRun(run)
 	}
 
 	return runs, nil

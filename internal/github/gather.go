@@ -22,27 +22,24 @@ import (
 	"github.com/dcjulian29/git-repo/internal/shared"
 )
 
-// Target pairs a caller-facing display name with the GitHub repository to query.
-type Target struct {
-	// Name is the display name for the repository (its configuration name).
-	Name string
+type (
+	// Target pairs a caller-facing display name with the GitHub repository to query.
+	Target struct {
+		// Name is the display name for the repository (its configuration name).
+		Name string
 
-	// Repo is the parsed owner and name used to build API requests.
-	Repo Repo
-}
+		// Repo is the parsed owner and name used to build API requests.
+		Repo Repo
+	}
 
-// Result holds the open items fetched for a single target, or the error
-// encountered while fetching them.
-type Result struct {
-	// Target is the repository the result is for.
-	Target Target
-
-	// Items are the open issues and pull requests, when Err is nil.
-	Items []Item
-
-	// Err is non-nil when the repository could not be fetched.
-	Err error
-}
+	// Result holds the open items fetched for a single target, or the error
+	// encountered while fetching them.
+	Result struct {
+		Err    error
+		Target Target
+		Items  []Item
+	}
+)
 
 // Gather fetches items matching opts for every target concurrently, bounded by
 // limit, and returns one Result per target in input order.

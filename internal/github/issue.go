@@ -24,57 +24,44 @@ import (
 	"time"
 )
 
-// Issue holds the details git-repo needs to triage a single issue.
-type Issue struct {
-	// Number is the issue number.
-	Number int
+type (
+	// Issue holds the details git-repo needs to triage a single issue.
+	Issue struct {
+		CreatedAt time.Time
+		Title     string
+		Author    string
+		State     string
+		Body      string
+		URL       string
+		Labels    []string
+		Assignees []string
+		Number    int
+		Comments  int
+	}
 
-	// Title is the issue title.
-	Title string
-
-	// Author is the login of the user who opened it.
-	Author string
-
-	// State is the issue state (for example "open").
-	State string
-
-	// Body is the issue description.
-	Body string
-
-	// Labels are the names of the labels currently applied.
-	Labels []string
-
-	// Assignees are the logins currently assigned.
-	Assignees []string
-
-	// Comments is the number of comments on the issue.
-	Comments int
-
-	// CreatedAt is the time the issue was opened.
-	CreatedAt time.Time
-
-	// URL is the html_url that opens the issue in a browser.
-	URL string
-}
-
-type issueDetailPayload struct {
-	Number    int       `json:"number"`
-	Title     string    `json:"title"`
-	State     string    `json:"state"`
-	Body      string    `json:"body"`
-	Comments  int       `json:"comments"`
-	CreatedAt time.Time `json:"created_at"`
-	HTMLURL   string    `json:"html_url"`
-	User      struct {
+	// userPayload is a GitHub user reference carrying just the login.
+	userPayload struct {
 		Login string `json:"login"`
-	} `json:"user"`
-	Labels []struct {
+	}
+
+	// labelPayload is a label reference carrying just the name.
+	labelPayload struct {
 		Name string `json:"name"`
-	} `json:"labels"`
-	Assignees []struct {
-		Login string `json:"login"`
-	} `json:"assignees"`
-}
+	}
+
+	issueDetailPayload struct {
+		CreatedAt time.Time      `json:"created_at"`
+		Title     string         `json:"title"`
+		State     string         `json:"state"`
+		Body      string         `json:"body"`
+		HTMLURL   string         `json:"html_url"`
+		User      userPayload    `json:"user"`
+		Labels    []labelPayload `json:"labels"`
+		Assignees []userPayload  `json:"assignees"`
+		Number    int            `json:"number"`
+		Comments  int            `json:"comments"`
+	}
+)
 
 // GetIssue fetches the details of a single issue.
 func (c *Client) GetIssue(ctx context.Context, repo Repo, number int) (Issue, error) {

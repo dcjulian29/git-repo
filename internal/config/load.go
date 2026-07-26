@@ -30,7 +30,7 @@ import (
 // Returns an error if the file cannot be read or parsed.
 func Load() (Configuration, error) {
 	once.Do(func() {
-		instance, loadError = load()
+		instance, loadError = loadFromDisk()
 	})
 
 	mutex.RLock()
@@ -39,7 +39,7 @@ func Load() (Configuration, error) {
 	return *instance, loadError
 }
 
-func load() (*Configuration, error) {
+func loadFromDisk() (*Configuration, error) {
 	cfg := &Configuration{}
 
 	home, err := os.UserHomeDir()
@@ -52,7 +52,7 @@ func load() (*Configuration, error) {
 		return cfg, nil
 	}
 
-	file, err := os.ReadFile(filePath) //nolint:gosec // G304: reads the app's own config file (home dir + constant name), not external input
+	file, err := os.ReadFile(filePath) //nolint:gosec // G304: config path is home dir + constant
 
 	if err != nil {
 		return cfg, fmt.Errorf("could not read git repository configuration: %w", err)

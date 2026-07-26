@@ -35,8 +35,14 @@ func filter(s git.RepoStatus) bool {
 	case noUpstream:
 		return s.NoUpstream
 	case actions:
-		return s.Dirty || s.PullNeeded || s.PushNeeded || s.Diverged || s.Untracked || s.NoUpstream
+		return needsAction(s)
 	default:
 		return true
 	}
+}
+
+// needsAction reports whether the repository requires any action at all.
+func needsAction(s git.RepoStatus) bool {
+	return s.Dirty || s.PullNeeded || s.PushNeeded ||
+		s.Diverged || s.Untracked || s.NoUpstream
 }

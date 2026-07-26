@@ -68,29 +68,11 @@ func NewCommand() *cobra.Command {
 				return fmt.Errorf("failed to create destination directory %q: %w", baseDir, err)
 			}
 
-			var toClone []config.Repository
-
-			for _, repo := range cfg.Repositories {
-				target := baseDir
-				if strings.Contains(repo.Name, "/") {
-					for sub := range strings.SplitSeq(repo.Name, "/") {
-						target = filepath.Join(target, sub)
-					}
-				} else {
-					target = filepath.Join(target, repo.Name)
-				}
-
-				if filesystem.DirectoryExist(target) {
-					fmt.Printf("%s  %s already exists — skipping\n",
-						color.GreenString("✔"),
-						color.CyanString(repo.Name))
-				} else {
-					toClone = append(toClone, repo)
-				}
-			}
+			toClone := planClones(baseDir, cfg.Repositories)
 
 			if len(toClone) == 0 {
 				fmt.Println(color.GreenString("\nAll configured repositories already exist. Nothing to do."))
+
 				return nil
 			}
 
@@ -100,26 +82,7 @@ func NewCommand() *cobra.Command {
 				color.CyanString(baseDir),
 			)
 
-			var cloneErrors []error
-
-			for _, repo := range toClone {
-				target := baseDir
-				if strings.Contains(repo.Name, "/") {
-					for sub := range strings.SplitSeq(repo.Name, "/") {
-						target = filepath.Join(target, sub)
-					}
-				} else {
-					target = filepath.Join(target, repo.Name)
-				}
-
-				if err := git.Clone(target, repo.URL); err != nil {
-					cloneErrors = append(cloneErrors,
-						fmt.Errorf("failed to clone %s: %w", color.CyanString(repo.Name), err))
-					fmt.Printf("\n%s  %s\n\n", color.RedString("✘"), err)
-				} else {
-					fmt.Printf("\n%s  %s\n\n", color.GreenString("✔"), repo.Name)
-				}
-			}
+			cloneErrors := cloneRepositories(baseDir, toClone)
 
 			if len(cloneErrors) > 0 {
 				return fmt.Errorf("%d clone operation(s) failed", len(cloneErrors))
@@ -132,4 +95,56 @@ func NewCommand() *cobra.Command {
 	}
 
 	return cmd
+}
+
+// repoTarget returns the on-disk destination directory for a repository,
+// treating a name containing "/" as a nested path under baseDir.
+func repoTarget(baseDir, name string) string {
+	target := baseDir
+
+	if strings.Contains(name, "/") {
+		for sub := range strings.SplitSeq(name, "/") {
+			target = filepath.Join(target, sub)
+		}
+	} else {
+		target = filepath.Join(target, name)
+	}
+
+	return target
+}
+
+// planClones reports which repositories still need to be cloned, printing a
+// message for each one that already exists on disk.
+func planClones(baseDir string, repos []config.Repository) []config.Repository {
+	var toClone []config.Repository
+
+	for _, repo := range repos {
+		if filesystem.DirectoryExist(repoTarget(baseDir, repo.Name)) {
+			fmt.Printf("%s  %s already exists — skipping\n",
+				color.GreenString("✔"),
+				color.CyanString(repo.Name))
+		} else {
+			toClone = append(toClone, repo)
+		}
+	}
+
+	return toClone
+}
+
+// cloneRepositories clones each repository into baseDir, printing progress and
+// returning the errors for any clones that failed.
+func cloneRepositories(baseDir string, repos []config.Repository) []error {
+	var cloneErrors []error
+
+	for _, repo := range repos {
+		if err := git.Clone(repoTarget(baseDir, repo.Name), repo.URL); err != nil {
+			cloneErrors = append(cloneErrors,
+				fmt.Errorf("failed to clone %s: %w", color.CyanString(repo.Name), err))
+			fmt.Printf("\n%s  %s\n\n", color.RedString("✘"), err)
+		} else {
+			fmt.Printf("\n%s  %s\n\n", color.GreenString("✔"), repo.Name)
+		}
+	}
+
+	return cloneErrors
 }

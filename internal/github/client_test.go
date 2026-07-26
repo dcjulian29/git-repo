@@ -45,9 +45,9 @@ func issuesJSON(t *testing.T, count, start int) []byte {
 	}
 
 	type item struct {
-		Number int    `json:"number"`
 		Title  string `json:"title"`
 		User   user   `json:"user"`
+		Number int    `json:"number"`
 	}
 
 	items := make([]item, count)

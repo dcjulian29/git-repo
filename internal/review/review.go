@@ -17,9 +17,10 @@ limitations under the License.
 package review
 
 import (
+	"cmp"
 	"context"
 	"errors"
-	"sort"
+	"slices"
 	"strings"
 
 	"github.com/dcjulian29/git-repo/internal/config"
@@ -27,27 +28,29 @@ import (
 	"github.com/dcjulian29/git-repo/internal/shared"
 )
 
-// NamedItem is an open item together with the display name of the repository it
-// belongs to.
-type NamedItem struct {
-	// Repo is the configuration name of the owning repository.
-	Repo string `json:"repo"`
+type (
+	// NamedItem is an open item together with the display name of the repository
+	// it belongs to.
+	NamedItem struct {
+		// Repo is the configuration name of the owning repository.
+		Repo string `json:"repo"`
 
-	github.Item
+		// ghRepo is the parsed repository, used to enrich pull requests with data
+		// the listing endpoint does not return. It is not serialised.
+		ghRepo github.Repo
 
-	// ghRepo is the parsed repository, used to enrich pull requests with data
-	// the listing endpoint does not return. It is not serialised.
-	ghRepo github.Repo
-}
+		github.Item
+	}
 
-// Report is the outcome of collecting open items across managed repositories.
-type Report struct {
-	// Results holds one entry per fetched repository, including any error.
-	Results []github.Result
+	// Report is the outcome of collecting open items across managed repositories.
+	Report struct {
+		// Results holds one entry per fetched repository, including any error.
+		Results []github.Result
 
-	// Skipped names the managed repositories that were not on github.com.
-	Skipped []string
-}
+		// Skipped names the managed repositories that were not on github.com.
+		Skipped []string
+	}
+)
 
 // Collect gathers the issues and pull requests matching opts for every managed
 // github.com repository, using the given client. Managed repositories whose URL
@@ -139,13 +142,11 @@ func (r Report) filter(pull bool) []NamedItem {
 		}
 	}
 
-	sort.SliceStable(items, func(i, j int) bool {
-		left, right := strings.ToLower(items[i].Repo), strings.ToLower(items[j].Repo)
-		if left != right {
-			return left < right
-		}
-
-		return items[i].Number < items[j].Number
+	slices.SortStableFunc(items, func(a, b NamedItem) int {
+		return cmp.Or(
+			cmp.Compare(strings.ToLower(a.Repo), strings.ToLower(b.Repo)),
+			cmp.Compare(a.Number, b.Number),
+		)
 	})
 
 	return items

@@ -23,13 +23,13 @@ func TestRepositoryManaged(t *testing.T) {
 	disabled := false
 
 	tests := []struct {
-		name string
 		repo Repository
+		name string
 		want bool
 	}{
-		{"unset defaults to managed", Repository{Name: "a"}, true},
-		{"explicit true is managed", Repository{Name: "a", Manage: &enabled}, true},
-		{"explicit false is skipped", Repository{Name: "a", Manage: &disabled}, false},
+		{name: "unset defaults to managed", repo: Repository{Name: "a"}, want: true},
+		{name: "explicit true is managed", repo: Repository{Name: "a", Manage: &enabled}, want: true},
+		{name: "explicit false is skipped", repo: Repository{Name: "a", Manage: &disabled}, want: false},
 	}
 
 	for _, tt := range tests {

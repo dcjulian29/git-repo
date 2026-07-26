@@ -25,7 +25,8 @@ import (
 )
 
 var (
-	compatBadgeExpr = regexp.MustCompile(`https://dependabot-badges\.githubapp\.com/badges/compatibility_score\?[^\s)"']+`)
+	compatBadgeExpr = regexp.MustCompile(
+		`https://dependabot-badges\.githubapp\.com/badges/compatibility_score\?[^\s)"']+`)
 	compatScoreExpr = regexp.MustCompile(`(\d+)%`)
 )
 
@@ -40,7 +41,7 @@ func CompatibilityScore(ctx context.Context, body string) string {
 		return ""
 	}
 
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, badge, nil) //nolint:gosec // G107: URL is matched against the fixed dependabot-badges host
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, badge, nil) //nolint:gosec // G107: badge host is fixed
 	if err != nil {
 		return ""
 	}

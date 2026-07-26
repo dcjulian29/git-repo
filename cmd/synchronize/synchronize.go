@@ -18,9 +18,10 @@ limitations under the License.
 package synchronize
 
 import (
+	"cmp"
 	"errors"
 	"fmt"
-	"sort"
+	"slices"
 	"strings"
 
 	"github.com/dcjulian29/git-repo/internal/cli"
@@ -65,6 +66,7 @@ func NewCommand() *cobra.Command {
 			dirs, err := git.FindGitRepositories(root)
 			if err != nil {
 				_ = spinner.Stop()
+
 				return fmt.Errorf("failed to walk directory: %w", err)
 			}
 
@@ -72,8 +74,8 @@ func NewCommand() *cobra.Command {
 
 			_ = spinner.Stop()
 
-			sort.Slice(results, func(i, j int) bool {
-				return strings.Compare(results[i].Folder, results[j].Folder) < 0
+			slices.SortFunc(results, func(a, b git.SyncResult) int {
+				return cmp.Compare(a.Folder, b.Folder)
 			})
 
 			for _, r := range results {

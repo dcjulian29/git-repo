@@ -48,6 +48,8 @@ func listCmd() *cobra.Command {
 				mode = "closed"
 			case merged:
 				mode = "merged"
+			default:
+				// no flag set: keep the default "open" mode
 			}
 
 			return review.ListPulls(context.Background(), mode, mergeState, asJSON)

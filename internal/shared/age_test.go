@@ -24,17 +24,17 @@ import (
 func TestAge(t *testing.T) {
 	tests := []struct {
 		name string
-		d    time.Duration
 		want string
+		d    time.Duration
 	}{
-		{"negative clamps to zero", -5 * time.Hour, "0m"},
-		{"minutes", 45 * time.Minute, "45m"},
-		{"hours", 5 * time.Hour, "5h"},
-		{"days", 3 * ageDay, "3d"},
-		{"months only", 5 * ageMonth, "5mo"},
-		{"months and days", 5*ageMonth + 12*ageDay, "5mo12d"},
-		{"years only", 2 * ageYear, "2y"},
-		{"years and months", ageYear + 2*ageMonth, "1y2mo"},
+		{name: "negative clamps to zero", d: -5 * time.Hour, want: "0m"},
+		{name: "minutes", d: 45 * time.Minute, want: "45m"},
+		{name: "hours", d: 5 * time.Hour, want: "5h"},
+		{name: "days", d: 3 * ageDay, want: "3d"},
+		{name: "months only", d: 5 * ageMonth, want: "5mo"},
+		{name: "months and days", d: 5*ageMonth + 12*ageDay, want: "5mo12d"},
+		{name: "years only", d: 2 * ageYear, want: "2y"},
+		{name: "years and months", d: ageYear + 2*ageMonth, want: "1y2mo"},
 	}
 
 	for _, tt := range tests {

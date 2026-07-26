@@ -39,6 +39,7 @@ func FindGitRepositories(path string) ([]string, error) {
 
 		if d.IsDir() && d.Name() == ".git" {
 			dirs = append(dirs, filepath.Dir(entry))
+
 			return filepath.SkipDir
 		}
 

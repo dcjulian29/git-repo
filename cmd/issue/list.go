@@ -47,6 +47,8 @@ func listCmd() *cobra.Command {
 				state = "closed"
 			case all:
 				state = "all"
+			default:
+				// no flag set: keep the default "open" state
 			}
 
 			opts := github.ListOptions{State: state, Labels: labels, Assignee: assignee}

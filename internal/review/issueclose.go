@@ -27,16 +27,17 @@ import (
 	"github.com/fatih/color"
 )
 
-// closeIssue shows the issue, confirms (unless skipConfirm), posts comment when
+// performClose shows the issue, confirms (unless skipConfirm), posts comment when
 // it is non-empty, and closes the issue with the given state reason. description
 // appears in the confirmation prompt (for example "completed").
-func closeIssue(
+func performClose(
 	ctx context.Context,
 	client *github.Client,
 	ref Ref,
 	comment, reason, description string,
 	skipConfirm bool,
 ) error {
+	// The issue is fetched first so its title can be shown before confirming.
 	issue, err := client.GetIssue(ctx, ref.Repo, ref.Number)
 	if err != nil {
 		return err

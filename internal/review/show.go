@@ -24,6 +24,13 @@ import (
 	"github.com/fatih/color"
 )
 
+// checkSummary collapses the check runs that share a display name into a single
+// worst-case run and the number of runs that used that name.
+type checkSummary struct {
+	run   github.CheckRun
+	count int
+}
+
 // newClient resolves a token and returns an authenticated GitHub client.
 func newClient() (*github.Client, error) {
 	token, err := github.Token()
@@ -140,13 +147,6 @@ func renderChecks(checks []github.CheckRun) {
 
 		fmt.Printf("    %-30s %s\n", name, checkStatus(summary.run))
 	}
-}
-
-// checkSummary collapses the check runs that share a display name into a single
-// worst-case run and the number of runs that used that name.
-type checkSummary struct {
-	run   github.CheckRun
-	count int
 }
 
 // aggregateChecks groups check runs by name, keeping the worst-case run for each

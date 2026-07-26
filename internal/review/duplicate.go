@@ -42,5 +42,5 @@ func DuplicateIssue(ctx context.Context, ref Ref, of int, note string, skipConfi
 
 	description := fmt.Sprintf("a duplicate of #%d", of)
 
-	return closeIssue(ctx, client, ref, comment, "not_planned", description, skipConfirm)
+	return performClose(ctx, client, ref, comment, "not_planned", description, skipConfirm)
 }

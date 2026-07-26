@@ -23,6 +23,19 @@ import (
 	"net/http"
 )
 
+// graphQLError is a single error entry in a GraphQL response envelope.
+type graphQLError struct {
+	Message string `json:"message"`
+}
+
+// markReadyMutation marks a draft pull request ready for review. Toggling the
+// draft state is only available through GraphQL, not the REST API.
+const markReadyMutation = `mutation($id: ID!) {
+  markPullRequestReadyForReview(input: {pullRequestId: $id}) {
+    pullRequest { number }
+  }
+}`
+
 // graphQL executes a GraphQL query against the GitHub API. GraphQL reports
 // application errors in the response body with a 200 status, so those are
 // surfaced as errors here. When out is non-nil the "data" object is decoded
@@ -32,9 +45,7 @@ func (c *Client) graphQL(ctx context.Context, query string, variables map[string
 
 	var envelope struct {
 		Data   json.RawMessage `json:"data"`
-		Errors []struct {
-			Message string `json:"message"`
-		} `json:"errors"`
+		Errors []graphQLError  `json:"errors"`
 	}
 
 	if err := c.doJSON(ctx, http.MethodPost, c.baseURL+"/graphql", request, &envelope); err != nil {
@@ -51,14 +62,6 @@ func (c *Client) graphQL(ctx context.Context, query string, variables map[string
 
 	return nil
 }
-
-// markReadyMutation marks a draft pull request ready for review. Toggling the
-// draft state is only available through GraphQL, not the REST API.
-const markReadyMutation = `mutation($id: ID!) {
-  markPullRequestReadyForReview(input: {pullRequestId: $id}) {
-    pullRequest { number }
-  }
-}`
 
 // MarkPullReady marks the pull request with the given node ID ready for review.
 func (c *Client) MarkPullReady(ctx context.Context, nodeID string) error {
