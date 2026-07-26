@@ -133,14 +133,12 @@ func renderChecks(checks []github.CheckRun) {
 	fmt.Printf("  Checks (%d):\n", len(summaries))
 
 	for _, summary := range summaries {
-		symbol, result := checkStatus(summary.run)
-
 		name := summary.run.Name
 		if summary.count > 1 {
 			name = fmt.Sprintf("%s ×%d", name, summary.count)
 		}
 
-		fmt.Printf("    %s %-28s %s\n", symbol, name, result)
+		fmt.Printf("    %-30s %s\n", name, checkStatus(summary.run))
 	}
 }
 
@@ -190,14 +188,15 @@ func checkSeverity(check github.CheckRun) int {
 	}
 }
 
-func checkStatus(check github.CheckRun) (string, string) {
-	if !check.Completed() {
-		return color.YellowString("•"), check.Status
+// checkStatus returns the check's result text colored green when it passed,
+// red when it failed, and yellow while it is still running.
+func checkStatus(check github.CheckRun) string {
+	switch {
+	case !check.Completed():
+		return color.YellowString(check.Status)
+	case check.Passed():
+		return color.GreenString(check.Conclusion)
+	default:
+		return color.RedString(check.Conclusion)
 	}
-
-	if check.Passed() {
-		return color.GreenString("✔"), check.Conclusion
-	}
-
-	return color.RedString("✘"), check.Conclusion
 }

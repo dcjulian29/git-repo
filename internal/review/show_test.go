@@ -17,7 +17,6 @@ limitations under the License.
 package review
 
 import (
-	"strings"
 	"testing"
 
 	"github.com/dcjulian29/git-repo/internal/github"
@@ -85,21 +84,27 @@ func TestCheckSeverity(t *testing.T) {
 	}
 }
 
-func TestCheckStatusPassedIsGreen(t *testing.T) {
+func TestCheckStatusColors(t *testing.T) {
 	previous := color.NoColor
 	color.NoColor = false
 
 	t.Cleanup(func() { color.NoColor = previous })
 
-	symbol, _ := checkStatus(github.CheckRun{Status: "completed", Conclusion: "success"})
-
-	if !strings.Contains(symbol, "\x1b[32m") {
-		t.Fatalf("passing symbol %q is not green", symbol)
+	cases := []struct {
+		name  string
+		check github.CheckRun
+		want  string
+	}{
+		{"passed", github.CheckRun{Status: "completed", Conclusion: "success"}, color.GreenString("success")},
+		{"failed", github.CheckRun{Status: "completed", Conclusion: "failure"}, color.RedString("failure")},
+		{"running", github.CheckRun{Status: "in_progress"}, color.YellowString("in_progress")},
 	}
 
-	// The heavy check mark carries a U+FE0E text-presentation selector so the
-	// green applies instead of a color emoji.
-	if !strings.ContainsRune(symbol, '︎') {
-		t.Fatalf("passing symbol %q lacks the text-presentation selector", symbol)
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			if got := checkStatus(tc.check); got != tc.want {
+				t.Fatalf("checkStatus(%s) = %q, want %q", tc.name, got, tc.want)
+			}
+		})
 	}
 }
