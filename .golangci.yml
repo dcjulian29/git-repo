@@ -7,26 +7,111 @@ issues:
 
 linters:
   enable:
+    - asciicheck
+    - bidichk
     - copyloopvar
+    - cyclop
+    - decorder
+    - dupl
     - durationcheck
+    - errcheck
     - errorlint
+    - exptostd
+    - funlen
+    - gochecknoglobals
+    - gocyclo
     - godot
     - gosec
+    - govet
+    - iface
     - intrange
+    - lll
     - misspell
+    - modernize
+    - nlreturn
     - perfsprint
     - predeclared
     - revive
+    - staticcheck
     - unconvert
+    - unused
     - usestdlibvars
     - wastedassign
-  settings:
-    godot:
-      scope: declarations
+    - whitespace
+
   exclusions:
+    presets:
+      - comments
+      - common-false-positives
+      - legacy
+      - std-error-handling
     rules:
-      # Test scaffolding legitimately creates temp dirs/files and launches the
-      # git subprocess with variable arguments; gosec targets production code.
+      - path: cmd/
+        linters:
+          - gochecknoglobals
+
       - path: _test\.go
         linters:
+          - funlen
+          - cyclop
+          - dupl
+          - maintidx
+          - gocyclo
+          - goerr113
           - gosec
+          - intrange
+          - wrapcheck
+          - varnamelen
+          - lll
+
+      - path: _test\.go
+        linter: revive
+        text: "add-constant|cyclomatic|function-length|cognitive-complexity|line-length-limit"
+
+  settings:
+    decorder:
+      dec-order:
+        - type
+        - const
+        - var
+        - func
+      disable-init-func-first-check: false
+      disable-dec-order-check: false
+      disable-dec-num-check: false
+    godot:
+      scope: declarations
+    gocyclo:
+      min-complexity: 15
+    govet:
+      enable-all: true
+    lll:
+      line-length: 120
+    perfsprint:
+      err-error: true
+      errorf: true
+    revive:
+      enable-all-rules: true
+      rules:
+        - name: add-constant
+          disabled: true
+        - name: flag-parameter
+          disabled: true
+        - name: cognitive-complexity
+          arguments:
+            - 15
+        - name: confusing-results
+          disabled: true
+        - name: line-length-limit
+          arguments:
+            - 120
+        - name: var-naming
+          arguments:
+            - []
+            - []
+            - - skip-package-name-collision-with-go-std: true
+    whitespace:
+      multi-if: true
+      multi-func: true
+
+run:
+  relative-path-mode: gitroot
