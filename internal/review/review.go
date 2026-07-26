@@ -34,6 +34,10 @@ type NamedItem struct {
 	Repo string `json:"repo"`
 
 	github.Item
+
+	// ghRepo is the parsed repository, used to enrich pull requests with data
+	// the listing endpoint does not return. It is not serialised.
+	ghRepo github.Repo
 }
 
 // Report is the outcome of collecting open items across managed repositories.
@@ -45,12 +49,11 @@ type Report struct {
 	Skipped []string
 }
 
-// Collect loads the configuration, resolves a GitHub token, and gathers the
-// issues and pull requests matching opts for every managed github.com
-// repository. Managed repositories whose URL is not on github.com are recorded
-// in Report.Skipped instead of being fetched. An assignee of "@me" is resolved
-// to the authenticated user's login.
-func Collect(ctx context.Context, opts github.ListOptions) (Report, error) {
+// Collect gathers the issues and pull requests matching opts for every managed
+// github.com repository, using the given client. Managed repositories whose URL
+// is not on github.com are recorded in Report.Skipped instead of being fetched.
+// An assignee of "@me" is resolved to the authenticated user's login.
+func Collect(ctx context.Context, client *github.Client, opts github.ListOptions) (Report, error) {
 	cfg, err := config.Load()
 	if err != nil {
 		return Report{}, err
@@ -79,13 +82,6 @@ func Collect(ctx context.Context, opts github.ListOptions) (Report, error) {
 	if len(targets) == 0 {
 		return Report{Skipped: skipped}, errors.New("no managed github.com repositories are configured")
 	}
-
-	token, err := github.Token()
-	if err != nil {
-		return Report{}, err
-	}
-
-	client := github.NewClient(token)
 
 	if opts.Assignee == "@me" {
 		login, err := client.Viewer(ctx)
@@ -138,7 +134,7 @@ func (r Report) filter(pull bool) []NamedItem {
 
 		for _, item := range res.Items {
 			if item.IsPull == pull {
-				items = append(items, NamedItem{Repo: res.Target.Name, Item: item})
+				items = append(items, NamedItem{Repo: res.Target.Name, Item: item, ghRepo: res.Target.Repo})
 			}
 		}
 	}

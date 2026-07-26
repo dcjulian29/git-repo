@@ -51,9 +51,10 @@ func PrintWarnings(w io.Writer, report Report) {
 // RenderTable writes items as a colour-coded table. The first column combines
 // the repository name and number into a "<repo>#<number>" handle (the same
 // handle other commands accept), labelled by handleColumn (for example "PR").
-// Columns size to their content and never wrap. When there are no items it
-// prints emptyMessage instead.
-func RenderTable(items []NamedItem, handleColumn, emptyMessage string) error {
+// When showMerge is set, a trailing MERGE column shows each pull request's merge
+// state, coloured green for "clean" and red otherwise. Columns size to their
+// content and never wrap; when there are no items it prints emptyMessage.
+func RenderTable(items []NamedItem, handleColumn, emptyMessage string, showMerge bool) error {
 	if len(items) == 0 {
 		fmt.Println(textformat.Info(emptyMessage))
 
@@ -65,6 +66,7 @@ func RenderTable(items []NamedItem, handleColumn, emptyMessage string) error {
 		title  string
 		author string
 		age    string
+		merge  string
 	}
 
 	// Track the natural (plain-text) width of every column so the title budget
@@ -72,6 +74,11 @@ func RenderTable(items []NamedItem, handleColumn, emptyMessage string) error {
 	handleWidth := utf8.RuneCountInString(handleColumn)
 	authorWidth := utf8.RuneCountInString("AUTHOR")
 	ageWidth := utf8.RuneCountInString("AGE")
+	mergeWidth := 0
+
+	if showMerge {
+		mergeWidth = utf8.RuneCountInString("MERGE")
+	}
 
 	rows := make([]row, len(items))
 
@@ -84,17 +91,29 @@ func RenderTable(items []NamedItem, handleColumn, emptyMessage string) error {
 		}
 
 		age := shared.Age(time.Since(item.CreatedAt))
-		rows[i] = row{handle: handle, title: title, author: item.Author, age: age}
+		rows[i] = row{handle: handle, title: title, author: item.Author, age: age, merge: item.MergeableState}
 
 		handleWidth = max(handleWidth, utf8.RuneCountInString(handle))
 		authorWidth = max(authorWidth, utf8.RuneCountInString(item.Author))
 		ageWidth = max(ageWidth, utf8.RuneCountInString(age))
+
+		if showMerge {
+			mergeWidth = max(mergeWidth, utf8.RuneCountInString(mergeStatePlain(item.MergeableState)))
+		}
 	}
 
 	// When writing to a terminal, cap the title column to the remaining width so
 	// the whole table fits on one line; otherwise leave titles intact.
 	if width, ok := terminalWidth(); ok {
-		titleWidth := titleBudget(width, handleWidth, authorWidth, ageWidth)
+		columns := 4
+		otherWidth := handleWidth + authorWidth + ageWidth
+
+		if showMerge {
+			columns = 5
+			otherWidth += mergeWidth
+		}
+
+		titleWidth := titleBudget(width, otherWidth, columns)
 		for i := range rows {
 			rows[i].title = truncate(rows[i].title, titleWidth)
 		}
@@ -112,10 +131,20 @@ func RenderTable(items []NamedItem, handleColumn, emptyMessage string) error {
 		}),
 	)
 
-	table.Header([]string{handleColumn, "TITLE", "AUTHOR", "AGE"})
+	header := []string{handleColumn, "TITLE", "AUTHOR", "AGE"}
+	if showMerge {
+		header = append(header, "MERGE")
+	}
+
+	table.Header(header)
 
 	for _, r := range rows {
-		if err := table.Append([]string{color.CyanString(r.handle), r.title, r.author, r.age}); err != nil {
+		cells := []string{color.CyanString(r.handle), r.title, r.author, r.age}
+		if showMerge {
+			cells = append(cells, colorMergeState(r.merge))
+		}
+
+		if err := table.Append(cells); err != nil {
 			return err
 		}
 	}
@@ -125,10 +154,37 @@ func RenderTable(items []NamedItem, handleColumn, emptyMessage string) error {
 
 // titleBudget returns the width to allow for the title column so that the whole
 // table fits within termWidth, never shrinking it below minTitleWidth.
-func titleBudget(termWidth, handleWidth, authorWidth, ageWidth int) int {
-	const chrome = 3*4 + 1 // padding + separators for four columns
+// otherWidth is the combined content width of the non-title columns and columns
+// is the total column count.
+func titleBudget(termWidth, otherWidth, columns int) int {
+	chrome := 3*columns + 1 // padding + separators
 
-	return max(termWidth-chrome-handleWidth-authorWidth-ageWidth, minTitleWidth)
+	return max(termWidth-chrome-otherWidth, minTitleWidth)
+}
+
+// mergeStatePlain returns the plain display text for a merge state, using "-"
+// for an unknown or empty state.
+func mergeStatePlain(state string) string {
+	if state == "" {
+		return "-"
+	}
+
+	return state
+}
+
+// colorMergeState returns the merge state coloured green when clean, yellow when
+// unknown, and red for any problem state such as "unstable" or "dirty".
+func colorMergeState(state string) string {
+	switch state {
+	case "":
+		return "-"
+	case "clean":
+		return color.GreenString("clean")
+	case "unknown":
+		return color.YellowString("unknown")
+	default:
+		return color.RedString(state)
+	}
 }
 
 // terminalWidth returns the width of the terminal attached to stdout, or false

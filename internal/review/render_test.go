@@ -51,13 +51,18 @@ func TestTruncate(t *testing.T) {
 }
 
 func TestTitleBudget(t *testing.T) {
-	// 120 - 13 chrome - 20 handle - 15 author - 5 age = 67.
-	if got := titleBudget(120, 20, 15, 5); got != 67 {
+	// 120 - 13 chrome (4 cols) - 40 other = 67.
+	if got := titleBudget(120, 40, 4); got != 67 {
 		t.Fatalf("titleBudget wide = %d, want 67", got)
 	}
 
+	// Five columns add 3 more chrome: 120 - 16 - 40 = 64.
+	if got := titleBudget(120, 40, 5); got != 64 {
+		t.Fatalf("titleBudget five columns = %d, want 64", got)
+	}
+
 	// A narrow terminal clamps to the floor rather than going negative.
-	if got := titleBudget(40, 20, 15, 5); got != minTitleWidth {
+	if got := titleBudget(40, 40, 4); got != minTitleWidth {
 		t.Fatalf("titleBudget narrow = %d, want %d", got, minTitleWidth)
 	}
 }

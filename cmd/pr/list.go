@@ -25,11 +25,12 @@ import (
 
 func listCmd() *cobra.Command {
 	var (
-		open   bool
-		closed bool
-		merged bool
-		draft  bool
-		asJSON bool
+		open       bool
+		closed     bool
+		merged     bool
+		draft      bool
+		mergeState string
+		asJSON     bool
 	)
 
 	cmd := &cobra.Command{
@@ -48,7 +49,7 @@ func listCmd() *cobra.Command {
 				mode = "merged"
 			}
 
-			return review.ListPulls(context.Background(), mode, asJSON)
+			return review.ListPulls(context.Background(), mode, mergeState, asJSON)
 		},
 	}
 
@@ -56,6 +57,8 @@ func listCmd() *cobra.Command {
 	cmd.Flags().BoolVar(&closed, "closed", false, "list closed (unmerged) pull requests")
 	cmd.Flags().BoolVar(&merged, "merged", false, "list merged pull requests")
 	cmd.Flags().BoolVar(&draft, "draft", false, "list draft pull requests")
+	cmd.Flags().StringVar(&mergeState, "merge-state", "",
+		"only pull requests with this merge state (e.g. clean, unstable, unknown; default all)")
 	cmd.Flags().BoolVar(&asJSON, "json", false, "output as JSON")
 	cmd.MarkFlagsMutuallyExclusive("open", "closed", "merged", "draft")
 

@@ -20,19 +20,28 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/dcjulian29/git-repo/internal/github"
+	"github.com/dcjulian29/git-repo/internal/shared"
 )
 
 // ListPulls prints the pull requests across managed repositories selected by
-// mode, one of "open", "closed", "merged", or "draft".
-func ListPulls(ctx context.Context, mode string, asJSON bool) error {
+// mode, one of "open", "closed", "merged", or "draft". When mergeState is
+// non-empty, only pull requests with that merge state (for example "clean") are
+// shown.
+func ListPulls(ctx context.Context, mode, mergeState string, asJSON bool) error {
 	state := "open"
 	if mode == "closed" || mode == "merged" {
 		state = "closed"
 	}
 
-	report, err := Collect(ctx, github.ListOptions{State: state})
+	client, err := newClient()
+	if err != nil {
+		return err
+	}
+
+	report, err := Collect(ctx, client, github.ListOptions{State: state})
 	if err != nil {
 		return err
 	}
@@ -41,11 +50,57 @@ func ListPulls(ctx context.Context, mode string, asJSON bool) error {
 
 	pulls := filterPulls(report.PullRequests(), mode)
 
+	// The listing endpoint does not report merge state; enrich the pull requests
+	// where it is meaningful (open and draft) or when it is being filtered on.
+	if mode == "open" || mode == "draft" || mergeState != "" {
+		pulls = enrichMergeState(ctx, client, pulls)
+	}
+
+	if mergeState != "" {
+		pulls = filterByMergeState(pulls, mergeState)
+	}
+
 	if asJSON {
 		return RenderJSON(pulls)
 	}
 
-	return RenderTable(pulls, "PR", fmt.Sprintf("No %s pull requests found.", mode))
+	return RenderTable(pulls, "PR", pullsEmptyMessage(mode, mergeState), true)
+}
+
+// filterByMergeState keeps only the pull requests whose merge state matches
+// state (case-insensitively).
+func filterByMergeState(pulls []NamedItem, state string) []NamedItem {
+	filtered := make([]NamedItem, 0, len(pulls))
+
+	for _, item := range pulls {
+		if strings.EqualFold(item.MergeableState, state) {
+			filtered = append(filtered, item)
+		}
+	}
+
+	return filtered
+}
+
+// pullsEmptyMessage returns the "nothing found" notice for the given mode and
+// optional merge-state filter.
+func pullsEmptyMessage(mode, mergeState string) string {
+	if mergeState != "" {
+		return fmt.Sprintf("No %s pull requests with merge state %q found.", mode, mergeState)
+	}
+
+	return fmt.Sprintf("No %s pull requests found.", mode)
+}
+
+// enrichMergeState fetches each pull request's merge state concurrently and
+// returns the pull requests with MergeableState populated.
+func enrichMergeState(ctx context.Context, client *github.Client, pulls []NamedItem) []NamedItem {
+	return shared.ParallelMap(pulls, shared.DefaultConcurrency(), func(item NamedItem) NamedItem {
+		if pull, err := client.GetPull(ctx, item.ghRepo, item.Number); err == nil {
+			item.MergeableState = pull.MergeableState
+		}
+
+		return item
+	})
 }
 
 // filterPulls narrows pull requests to those matching mode. The state query has
@@ -78,7 +133,12 @@ func filterPulls(pulls []NamedItem, mode string) []NamedItem {
 
 // ListIssues prints the issues across managed repositories matching opts.
 func ListIssues(ctx context.Context, opts github.ListOptions, asJSON bool) error {
-	report, err := Collect(ctx, opts)
+	client, err := newClient()
+	if err != nil {
+		return err
+	}
+
+	report, err := Collect(ctx, client, opts)
 	if err != nil {
 		return err
 	}
@@ -91,7 +151,7 @@ func ListIssues(ctx context.Context, opts github.ListOptions, asJSON bool) error
 		return RenderJSON(issues)
 	}
 
-	return RenderTable(issues, "ISSUE", issuesEmptyMessage(opts.State))
+	return RenderTable(issues, "ISSUE", issuesEmptyMessage(opts.State), false)
 }
 
 // issuesEmptyMessage returns the "nothing found" notice appropriate to the

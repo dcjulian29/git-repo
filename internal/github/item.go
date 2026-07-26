@@ -43,6 +43,11 @@ type Item struct {
 
 	// Merged is true when the item is a pull request that has been merged.
 	Merged bool `json:"merged"`
+
+	// MergeableState is a pull request's coarse merge state ("clean",
+	// "unstable", "dirty", ...). It is populated on demand for pull-request
+	// listings and is empty for issues.
+	MergeableState string `json:"mergeable_state,omitempty"`
 }
 
 // issuePayload mirrors the fields git-repo needs from the GitHub issues API,

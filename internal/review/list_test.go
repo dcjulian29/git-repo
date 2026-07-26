@@ -57,6 +57,28 @@ func TestFilterPulls(t *testing.T) {
 	}
 }
 
+func TestFilterByMergeState(t *testing.T) {
+	pulls := []NamedItem{
+		{Item: github.Item{Number: 1, MergeableState: "clean"}},
+		{Item: github.Item{Number: 2, MergeableState: "unstable"}},
+		{Item: github.Item{Number: 3, MergeableState: "unknown"}},
+		{Item: github.Item{Number: 4, MergeableState: "clean"}},
+	}
+
+	got := filterByMergeState(pulls, "CLEAN") // case-insensitive
+	if len(got) != 2 || got[0].Number != 1 || got[1].Number != 4 {
+		t.Fatalf("clean filter = %+v, want #1 and #4", got)
+	}
+
+	if got := filterByMergeState(pulls, "unstable"); len(got) != 1 || got[0].Number != 2 {
+		t.Fatalf("unstable filter = %+v, want #2", got)
+	}
+
+	if got := filterByMergeState(pulls, "nope"); len(got) != 0 {
+		t.Fatalf("unknown state filter should match nothing, got %+v", got)
+	}
+}
+
 func TestIssuesEmptyMessage(t *testing.T) {
 	cases := map[string]string{
 		"":       "No open issues found.",
