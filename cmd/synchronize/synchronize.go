@@ -23,6 +23,7 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/dcjulian29/git-repo/internal/cli"
 	"github.com/dcjulian29/git-repo/internal/config"
 	"github.com/dcjulian29/git-repo/internal/git"
 	"github.com/dcjulian29/git-repo/internal/shared"
@@ -38,17 +39,7 @@ func NewCommand() *cobra.Command {
 		Use:     "synchronize",
 		Short:   "Synchronize all managed git repositories",
 		Aliases: []string{"sync", "synchronise"},
-		Args: func(cmd *cobra.Command, args []string) error {
-			if err := cobra.NoArgs(cmd, args); err != nil {
-				if err := cmd.Usage(); err != nil {
-					return err
-				}
-
-				return err
-			}
-
-			return nil
-		},
+		Args:    cli.WithUsage(cobra.NoArgs),
 		RunE: func(_ *cobra.Command, _ []string) error {
 			cfg, err := config.Load()
 			if err != nil {

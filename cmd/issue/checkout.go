@@ -19,6 +19,7 @@ package issue
 import (
 	"context"
 
+	"github.com/dcjulian29/git-repo/internal/cli"
 	"github.com/dcjulian29/git-repo/internal/review"
 	"github.com/spf13/cobra"
 )
@@ -32,7 +33,7 @@ func checkoutCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "checkout <repo>#<number>",
 		Short: "Create a branch and draft PR to start work on an issue",
-		Args:  cobra.ExactArgs(1),
+		Args:  cli.WithUsage(cobra.ExactArgs(1)),
 		RunE: func(_ *cobra.Command, args []string) error {
 			ref, err := review.ParseRef(args[0])
 			if err != nil {

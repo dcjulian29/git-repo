@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/dcjulian29/git-repo/internal/cli"
 	"github.com/dcjulian29/git-repo/internal/config"
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
@@ -30,25 +31,7 @@ func removeCmd() *cobra.Command {
 		Use:     "remove <name>",
 		Short:   "Remove a repository from the configuration by name",
 		Aliases: []string{"rm", "delete", "del"},
-		Args: func(cmd *cobra.Command, args []string) error {
-			if err := cobra.MinimumNArgs(1)(cmd, args); err != nil {
-				if err := cmd.Usage(); err != nil {
-					return err
-				}
-
-				return err
-			}
-
-			if err := cobra.MaximumNArgs(1)(cmd, args); err != nil {
-				if err := cmd.Usage(); err != nil {
-					return err
-				}
-
-				return err
-			}
-
-			return nil
-		},
+		Args:    cli.WithUsage(cobra.ExactArgs(1)),
 		RunE: func(_ *cobra.Command, args []string) error {
 			name := args[0]
 

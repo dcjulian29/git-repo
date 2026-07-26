@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/dcjulian29/git-repo/internal/cli"
 	"github.com/dcjulian29/git-repo/internal/config"
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
@@ -47,17 +48,7 @@ func manageStateCmd(use, short string, managed bool) *cobra.Command {
 	return &cobra.Command{
 		Use:   use,
 		Short: short,
-		Args: func(cmd *cobra.Command, args []string) error {
-			if err := cobra.ExactArgs(1)(cmd, args); err != nil {
-				if err := cmd.Usage(); err != nil {
-					return err
-				}
-
-				return err
-			}
-
-			return nil
-		},
+		Args:  cli.WithUsage(cobra.ExactArgs(1)),
 		RunE: func(_ *cobra.Command, args []string) error {
 			return setManaged(args[0], managed)
 		},

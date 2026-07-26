@@ -19,6 +19,7 @@ package label
 import (
 	"context"
 
+	"github.com/dcjulian29/git-repo/internal/cli"
 	"github.com/dcjulian29/git-repo/internal/review"
 	"github.com/spf13/cobra"
 )
@@ -30,7 +31,7 @@ func removeCmd() *cobra.Command {
 		Use:     "remove <repo> <name>",
 		Short:   "Delete a label from a repository",
 		Aliases: []string{"rm", "delete", "del"},
-		Args:    cobra.ExactArgs(2),
+		Args:    cli.WithUsage(cobra.ExactArgs(2)),
 		RunE: func(_ *cobra.Command, args []string) error {
 			return review.RemoveLabel(context.Background(), args[0], args[1], yes)
 		},

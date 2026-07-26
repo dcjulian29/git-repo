@@ -19,6 +19,7 @@ package issue
 import (
 	"context"
 
+	"github.com/dcjulian29/git-repo/internal/cli"
 	"github.com/dcjulian29/git-repo/internal/review"
 	"github.com/spf13/cobra"
 )
@@ -27,7 +28,7 @@ func labelCmd() *cobra.Command {
 	return &cobra.Command{
 		Use:   "label <repo>#<number> <label> [label...]",
 		Short: "Add one or more existing labels to an issue",
-		Args:  cobra.MinimumNArgs(2),
+		Args:  cli.WithUsage(cobra.MinimumNArgs(2)),
 		RunE: func(_ *cobra.Command, args []string) error {
 			ref, err := review.ParseRef(args[0])
 			if err != nil {

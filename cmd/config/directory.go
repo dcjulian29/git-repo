@@ -19,6 +19,7 @@ package config
 import (
 	"fmt"
 
+	"github.com/dcjulian29/git-repo/internal/cli"
 	"github.com/dcjulian29/git-repo/internal/config"
 	"github.com/dcjulian29/go-toolbox/textformat"
 	"github.com/spf13/cobra"
@@ -29,25 +30,7 @@ func directoryCmd() *cobra.Command {
 		Use:     "directory <path>",
 		Aliases: []string{"set-dir"},
 		Short:   "Set or update the managed directory",
-		Args: func(cmd *cobra.Command, args []string) error {
-			if err := cobra.MinimumNArgs(1)(cmd, args); err != nil {
-				if err := cmd.Usage(); err != nil {
-					return err
-				}
-
-				return err
-			}
-
-			if err := cobra.MaximumNArgs(1)(cmd, args); err != nil {
-				if err := cmd.Usage(); err != nil {
-					return err
-				}
-
-				return err
-			}
-
-			return nil
-		},
+		Args:    cli.WithUsage(cobra.ExactArgs(1)),
 		RunE: func(_ *cobra.Command, args []string) error {
 			cfg, err := config.Load()
 			if err != nil {

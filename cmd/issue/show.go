@@ -19,6 +19,7 @@ package issue
 import (
 	"context"
 
+	"github.com/dcjulian29/git-repo/internal/cli"
 	"github.com/dcjulian29/git-repo/internal/review"
 	"github.com/spf13/cobra"
 )
@@ -27,7 +28,7 @@ func showCmd() *cobra.Command {
 	return &cobra.Command{
 		Use:   "show <repo>#<number>",
 		Short: "Show an issue's details, labels, and assignees",
-		Args:  cobra.ExactArgs(1),
+		Args:  cli.WithUsage(cobra.ExactArgs(1)),
 		RunE: func(_ *cobra.Command, args []string) error {
 			ref, err := review.ParseRef(args[0])
 			if err != nil {

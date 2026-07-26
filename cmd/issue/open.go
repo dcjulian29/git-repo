@@ -19,6 +19,7 @@ package issue
 import (
 	"fmt"
 
+	"github.com/dcjulian29/git-repo/internal/cli"
 	"github.com/dcjulian29/git-repo/internal/review"
 	"github.com/dcjulian29/git-repo/internal/shared"
 	"github.com/spf13/cobra"
@@ -28,7 +29,7 @@ func openCmd() *cobra.Command {
 	return &cobra.Command{
 		Use:   "open <repo>#<number>",
 		Short: "Open an issue in the default browser",
-		Args:  cobra.ExactArgs(1),
+		Args:  cli.WithUsage(cobra.ExactArgs(1)),
 		RunE: func(_ *cobra.Command, args []string) error {
 			ref, err := review.ParseRef(args[0])
 			if err != nil {

@@ -19,6 +19,7 @@ package issue
 import (
 	"context"
 
+	"github.com/dcjulian29/git-repo/internal/cli"
 	"github.com/dcjulian29/git-repo/internal/github"
 	"github.com/dcjulian29/git-repo/internal/review"
 	"github.com/spf13/cobra"
@@ -37,7 +38,7 @@ func listCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list",
 		Short: "List issues across managed repositories",
-		Args:  cobra.NoArgs,
+		Args:  cli.WithUsage(cobra.NoArgs),
 		RunE: func(_ *cobra.Command, _ []string) error {
 			state := "open"
 

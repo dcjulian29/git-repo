@@ -19,6 +19,7 @@ package label
 import (
 	"context"
 
+	"github.com/dcjulian29/git-repo/internal/cli"
 	"github.com/dcjulian29/git-repo/internal/review"
 	"github.com/spf13/cobra"
 )
@@ -32,7 +33,7 @@ func createCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "create <repo> <name>",
 		Short: "Create a label in a repository",
-		Args:  cobra.ExactArgs(2),
+		Args:  cli.WithUsage(cobra.ExactArgs(2)),
 		RunE: func(_ *cobra.Command, args []string) error {
 			return review.CreateLabel(context.Background(), args[0], args[1], labelColor, description)
 		},

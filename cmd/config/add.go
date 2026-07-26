@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/dcjulian29/git-repo/internal/cli"
 	"github.com/dcjulian29/git-repo/internal/config"
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
@@ -31,25 +32,7 @@ func addCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "add <name> <url>",
 		Short: "Add a repository to the configuration",
-		Args: func(cmd *cobra.Command, args []string) error {
-			if err := cobra.MinimumNArgs(2)(cmd, args); err != nil {
-				if err := cmd.Usage(); err != nil {
-					return err
-				}
-
-				return err
-			}
-
-			if err := cobra.MaximumNArgs(2)(cmd, args); err != nil {
-				if err := cmd.Usage(); err != nil {
-					return err
-				}
-
-				return err
-			}
-
-			return nil
-		},
+		Args:  cli.WithUsage(cobra.ExactArgs(2)),
 		RunE: func(_ *cobra.Command, args []string) error {
 			name, url := args[0], args[1]
 
