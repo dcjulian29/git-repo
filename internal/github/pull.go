@@ -28,6 +28,10 @@ type PullRequest struct {
 	// Number is the pull-request number.
 	Number int
 
+	// NodeID is the GraphQL global node ID, needed for GraphQL-only mutations
+	// such as marking a draft ready for review.
+	NodeID string
+
 	// Title is the pull-request title.
 	Title string
 
@@ -76,6 +80,7 @@ func (p PullRequest) HasConflicts() bool {
 
 type pullPayload struct {
 	Number         int    `json:"number"`
+	NodeID         string `json:"node_id"`
 	Title          string `json:"title"`
 	State          string `json:"state"`
 	Draft          bool   `json:"draft"`
@@ -115,6 +120,7 @@ func (c *Client) GetPull(ctx context.Context, repo Repo, number int) (PullReques
 func (p pullPayload) toPullRequest() PullRequest {
 	return PullRequest{
 		Number:         p.Number,
+		NodeID:         p.NodeID,
 		Title:          p.Title,
 		Author:         p.User.Login,
 		State:          p.State,
