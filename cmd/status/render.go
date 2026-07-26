@@ -23,82 +23,23 @@ import (
 	"github.com/dcjulian29/git-repo/internal/git"
 	"github.com/fatih/color"
 	"github.com/olekukonko/tablewriter"
-	"github.com/olekukonko/tablewriter/renderer"
 	"github.com/olekukonko/tablewriter/tw"
 )
 
 func render(results []git.RepoStatus) {
-	var table *tablewriter.Table
+	table := tablewriter.NewTable(os.Stdout,
+		tablewriter.WithConfig(tablewriter.Config{
+			Header: tw.CellConfig{
+				Formatting: tw.CellFormatting{AutoFormat: tw.Off},
+			},
+			Row: tw.CellConfig{
+				Formatting: tw.CellFormatting{AutoWrap: tw.WrapNone},
+				Alignment:  tw.CellAlignment{Global: tw.AlignLeft},
+			},
+		}),
+	)
 
-	if actions {
-		table = tablewriter.NewTable(os.Stdout,
-			tablewriter.WithConfig(tablewriter.Config{
-				Row: tw.CellConfig{
-					Formatting: tw.CellFormatting{
-						AutoWrap:   tw.WrapNone,
-						AutoFormat: tw.Off,
-					},
-					Alignment: tw.CellAlignment{
-						Global: tw.AlignLeft,
-					},
-					Padding: tw.CellPadding{
-						Global: tw.Padding{Left: "  ", Right: ""},
-					},
-				},
-				Header: tw.CellConfig{
-					Formatting: tw.CellFormatting{
-						AutoFormat: tw.Off,
-					},
-					Padding: tw.CellPadding{
-						Global: tw.Padding{Left: "  ", Right: ""},
-					},
-				},
-				Behavior: tw.Behavior{
-					TrimSpace: tw.Off,
-				},
-			}),
-			tablewriter.WithRenderer(renderer.NewBlueprint(
-				tw.Rendition{
-
-					Borders: tw.Border{
-						Left:   tw.Off,
-						Top:    tw.Off,
-						Right:  tw.Off,
-						Bottom: tw.Off,
-					},
-					Settings: tw.Settings{
-						Lines: tw.Lines{
-							ShowHeaderLine: tw.Off,
-						},
-						Separators: tw.Separators{
-							BetweenColumns: tw.Off,
-							BetweenRows:    tw.Off,
-						},
-					},
-					Symbols: tw.NewSymbols(tw.StyleNone),
-				},
-			)),
-		)
-	} else {
-		table = tablewriter.NewTable(os.Stdout,
-			tablewriter.WithRenderer(renderer.NewBlueprint(
-				tw.Rendition{
-					Borders: tw.Border{
-						Left:   tw.On,
-						Top:    tw.Off,
-						Right:  tw.On,
-						Bottom: tw.Off,
-					},
-					Settings: tw.Settings{
-						Lines: tw.Lines{
-							ShowHeaderLine: tw.On,
-						},
-						Separators: tw.Separators{},
-					},
-				},
-			)),
-		)
-	}
+	table.Header([]string{"PATH", "DIRTY", "PUSH", "PULL", "DIVERGED", "UNTRACKED", "NO UPSTREAM"})
 
 	for _, s := range results {
 		if actions {
@@ -121,9 +62,6 @@ func render(results []git.RepoStatus) {
 				git.ColorBool(s.Untracked, false),
 				git.ColorBool(s.NoUpstream, false),
 			})
-
-			table.Header([]string{"PATH", "DIRTY", "PUSH", "PULL", "DIVERGED", "UNTRACKED", "NO UPSTREAM"})
-
 		}
 	}
 
