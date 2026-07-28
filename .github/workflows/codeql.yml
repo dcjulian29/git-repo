@@ -11,8 +11,6 @@ name: CodeQL Analysis
 
   pull_request:
     branches: [ "main" ]
-  schedule:
-    - cron: '37 0 * * 4'
 
 jobs:
   analyze:
