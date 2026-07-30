@@ -96,6 +96,14 @@ linters:
           disabled: true
         - name: flag-parameter
           disabled: true
+        # A CLI writes to stdout/stderr constantly; the error from the fmt
+        # print family to those streams is conventionally ignored (errcheck
+        # excludes it by default). The rule still fires for other unhandled
+        # errors that matter.
+        - name: unhandled-error
+          arguments:
+            - "fmt\\.Print.*"
+            - "fmt\\.Fprint.*"
         - name: cognitive-complexity
           arguments:
             - 15

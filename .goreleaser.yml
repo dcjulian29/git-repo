@@ -50,7 +50,7 @@ publishers:
       - packages
     dir: "{{ dir .ArtifactPath }}"
     cmd: >-
-      curl -sf
+      curl -sSf
       -F package=@{{ .ArtifactName }}
       https://{{ .Env.FURY_TOKEN }}@push.fury.io/dcjulian29/
     disable: "{{ if or .IsNightly .IsSnapshot }}true{{ end }}"
