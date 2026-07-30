@@ -21,6 +21,7 @@ package cmd
 
 import (
 	"github.com/dcjulian29/git-repo/cmd/config"
+	"github.com/dcjulian29/git-repo/cmd/gocmd"
 	"github.com/dcjulian29/git-repo/cmd/initialize"
 	"github.com/dcjulian29/git-repo/cmd/issue"
 	"github.com/dcjulian29/git-repo/cmd/label"
@@ -43,6 +44,7 @@ local Git repositories declared in ~/.config/git-repo.yml.`,
 
 func init() {
 	rootCmd.AddCommand(config.NewCommand())
+	rootCmd.AddCommand(gocmd.NewCommand())
 	rootCmd.AddCommand(initialize.NewCommand())
 	rootCmd.AddCommand(issue.NewCommand())
 	rootCmd.AddCommand(label.NewCommand())
