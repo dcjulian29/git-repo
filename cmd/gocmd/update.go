@@ -36,16 +36,25 @@ and CI builds use the same Go. Only go.mod is changed; other dependencies are
 left untouched. A repository is skipped when it has no go.mod or when its go.mod
 or go.sum already has uncommitted changes.
 
-By default the change is left in the working tree for review. Use --commit to
-commit it (without pushing), or --push to commit and push.`,
+By default you are asked to confirm each repository before it is changed, so a
+repo can stay on a specific Go version; the change is then left in the working
+tree for review. Use --force to update every repository without prompting,
+--preview to see what would change without modifying anything, --commit to
+commit the change (without pushing), or --push to commit and push.`,
 		Args: cli.WithUsage(cobra.NoArgs),
 		RunE: func(_ *cobra.Command, _ []string) error {
 			return goversion.UpdateManaged(opts)
 		},
 	}
 
+	cmd.Flags().BoolVar(&opts.Preview, "preview", false, "show what would change without modifying anything")
+	cmd.Flags().BoolVar(&opts.Force, "force", false, "update every repository without prompting")
 	cmd.Flags().BoolVar(&opts.Commit, "commit", false, "commit the change without pushing")
 	cmd.Flags().BoolVar(&opts.Push, "push", false, "commit and push the change")
+
+	cmd.MarkFlagsMutuallyExclusive("preview", "force")
+	cmd.MarkFlagsMutuallyExclusive("preview", "commit")
+	cmd.MarkFlagsMutuallyExclusive("preview", "push")
 
 	return cmd
 }

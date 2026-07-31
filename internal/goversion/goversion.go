@@ -22,11 +22,13 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"os"
 	"path/filepath"
 	"strings"
 
 	"github.com/dcjulian29/git-repo/internal/config"
 	"github.com/dcjulian29/git-repo/internal/git"
+	"github.com/dcjulian29/git-repo/internal/shared"
 	"github.com/dcjulian29/go-toolbox/execute"
 	"github.com/dcjulian29/go-toolbox/filesystem"
 	"github.com/dcjulian29/go-toolbox/textformat"
@@ -40,6 +42,13 @@ type Options struct {
 
 	// Push commits the change and pushes it to the remote.
 	Push bool
+
+	// Preview reports what would change without modifying any repository.
+	Preview bool
+
+	// Force updates every repository without the per-repository confirmation
+	// that is otherwise requested by default.
+	Force bool
 }
 
 // UpdateManaged rewrites the go directive of every managed repository's go.mod
@@ -112,9 +121,25 @@ func updateRepository(path, name, version string, opts Options) {
 		return
 	}
 
-	current := currentVersion(path)
-	if current == version {
+	from := currentVersion(path)
+	if from == "" {
+		from = "unset"
+	}
+
+	if from == version {
 		fmt.Printf("%s already on Go %s.\n", handle, version)
+
+		return
+	}
+
+	if opts.Preview {
+		fmt.Printf("%s would update %s → %s\n", handle, from, version)
+
+		return
+	}
+
+	if !opts.Force && !confirm(name, from, version) {
+		fmt.Printf("%s kept on Go %s.\n", handle, from)
 
 		return
 	}
@@ -125,14 +150,23 @@ func updateRepository(path, name, version string, opts Options) {
 		return
 	}
 
-	from := current
-	if from == "" {
-		from = "unset"
-	}
-
 	fmt.Printf("%s %s → %s\n", handle, from, version)
 
 	recordChange(path, name, version, opts)
+}
+
+// confirm asks whether the repository should be updated, returning false (keep
+// the current version) when the user declines or the response cannot be read.
+func confirm(name, from, version string) bool {
+	confirmed, err := shared.Confirm(os.Stdin, os.Stdout,
+		fmt.Sprintf("Update %s from Go %s to %s?", name, from, version))
+	if err != nil {
+		fmt.Println(textformat.Warn(fmt.Sprintf("Could not read a response for %s: %v", name, err)))
+
+		return false
+	}
+
+	return confirmed
 }
 
 // recordChange commits (and optionally pushes) the go.mod change when the
