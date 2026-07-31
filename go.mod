@@ -3,7 +3,7 @@ module github.com/dcjulian29/git-repo
 go 1.26.5
 
 require (
-	github.com/dcjulian29/go-toolbox v0.31.1
+	github.com/dcjulian29/go-toolbox v0.33.0
 	github.com/fatih/color v1.19.0
 	github.com/olekukonko/tablewriter v1.1.4
 	github.com/spf13/cobra v1.10.2
