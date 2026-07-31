@@ -1,6 +1,6 @@
 module github.com/dcjulian29/git-repo
 
-go 1.25.0
+go 1.26.5
 
 require (
 	github.com/dcjulian29/go-toolbox v0.31.1
