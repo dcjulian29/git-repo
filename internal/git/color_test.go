@@ -70,22 +70,6 @@ func TestColorBool(t *testing.T) {
 	}
 }
 
-func TestActionLabel(t *testing.T) {
-	forceColor(t)
-
-	if got := ActionLabel(false, "dirty", true); got != "" {
-		t.Fatalf("expected empty label when flag is false, got %q", got)
-	}
-
-	if got := ActionLabel(true, "diverged", true); !strings.Contains(got, ansiRed) {
-		t.Fatalf("expected red label, got %q", got)
-	}
-
-	if got := ActionLabel(true, "no upstream", false); !strings.Contains(got, ansiYellow) {
-		t.Fatalf("expected yellow label, got %q", got)
-	}
-}
-
 func TestColorPath(t *testing.T) {
 	forceColor(t)
 

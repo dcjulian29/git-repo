@@ -41,8 +41,9 @@ func filter(s git.RepoStatus) bool {
 	}
 }
 
-// needsAction reports whether the repository requires any action at all.
+// needsAction reports whether the repository requires action. Untracked files
+// and a missing upstream are informational, not actionable, so they are
+// excluded.
 func needsAction(s git.RepoStatus) bool {
-	return s.Dirty || s.PullNeeded || s.PushNeeded ||
-		s.Diverged || s.Untracked || s.NoUpstream
+	return s.Dirty || s.PullNeeded || s.PushNeeded || s.Diverged
 }

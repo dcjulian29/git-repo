@@ -71,15 +71,39 @@ func TestFilterIndividualFlags(t *testing.T) {
 	}
 }
 
-func TestFilterActionsIncludesNoUpstream(t *testing.T) {
+func TestFilterActions(t *testing.T) {
 	resetFilters()
 	actions = true
 
-	if !filter(git.RepoStatus{NoUpstream: true}) {
-		t.Fatal("--actions should include a no-upstream repository")
+	included := []struct {
+		name   string
+		status git.RepoStatus
+	}{
+		{"dirty", git.RepoStatus{Dirty: true}},
+		{"push needed", git.RepoStatus{PushNeeded: true}},
+		{"pull needed", git.RepoStatus{PullNeeded: true}},
+		{"diverged", git.RepoStatus{Diverged: true}},
 	}
 
-	if filter(git.RepoStatus{}) {
-		t.Fatal("--actions should exclude a clean repository")
+	for _, tt := range included {
+		if !filter(tt.status) {
+			t.Fatalf("--actions should include a %s repository", tt.name)
+		}
+	}
+
+	// Untracked files and a missing upstream are informational, not actionable.
+	excluded := []struct {
+		name   string
+		status git.RepoStatus
+	}{
+		{"clean", git.RepoStatus{}},
+		{"untracked only", git.RepoStatus{Untracked: true}},
+		{"no upstream only", git.RepoStatus{NoUpstream: true}},
+	}
+
+	for _, tt := range excluded {
+		if filter(tt.status) {
+			t.Fatalf("--actions should exclude a %s repository", tt.name)
+		}
 	}
 }

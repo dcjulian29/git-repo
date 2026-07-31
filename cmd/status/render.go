@@ -42,27 +42,15 @@ func render(results []git.RepoStatus) {
 	table.Header([]string{"PATH", "DIRTY", "PUSH", "PULL", "DIVERGED", "UNTRACKED", "NO UPSTREAM"})
 
 	for _, s := range results {
-		if actions {
-			_ = table.Append([]string{
-				git.ColorPath(s),
-				git.ActionLabel(s.Dirty, "dirty", false),
-				git.ActionLabel(s.PushNeeded, "push needed", true),
-				git.ActionLabel(s.PullNeeded, "pull needed", true),
-				git.ActionLabel(s.Diverged, "diverged", true),
-				git.ActionLabel(s.Untracked, "untracked files", false),
-				git.ActionLabel(s.NoUpstream, "no upstream", false),
-			})
-		} else {
-			_ = table.Append([]string{
-				git.ColorPath(s),
-				git.ColorBool(s.Dirty, false),
-				git.ColorBool(s.PushNeeded, true),
-				git.ColorBool(s.PullNeeded, true),
-				git.ColorBool(s.Diverged, true),
-				git.ColorBool(s.Untracked, false),
-				git.ColorBool(s.NoUpstream, false),
-			})
-		}
+		_ = table.Append([]string{
+			git.ColorPath(s),
+			git.ColorBool(s.Dirty, false),
+			git.ColorBool(s.PushNeeded, true),
+			git.ColorBool(s.PullNeeded, true),
+			git.ColorBool(s.Diverged, true),
+			git.ColorBool(s.Untracked, false),
+			git.ColorBool(s.NoUpstream, false),
+		})
 	}
 
 	fmt.Println()
