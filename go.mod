@@ -5,7 +5,7 @@ go 1.26.5
 require (
 	github.com/dcjulian29/go-toolbox v0.33.0
 	github.com/fatih/color v1.19.0
-	github.com/olekukonko/tablewriter v1.1.4
+	github.com/olekukonko/tablewriter v1.1.5
 	github.com/spf13/cobra v1.10.2
 	go.szostok.io/version v1.2.0
 	gopkg.in/yaml.v3 v3.0.1
