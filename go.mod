@@ -3,7 +3,7 @@ module github.com/dcjulian29/git-repo
 go 1.26.5
 
 require (
-	github.com/dcjulian29/go-toolbox v0.33.0
+	github.com/dcjulian29/go-toolbox v0.33.1
 	github.com/fatih/color v1.19.0
 	github.com/olekukonko/tablewriter v1.1.4
 	github.com/spf13/cobra v1.10.2
@@ -11,7 +11,7 @@ require (
 	gopkg.in/yaml.v3 v3.0.1
 )
 
-require golang.org/x/term v0.45.0
+require golang.org/x/term v0.46.0
 
 require (
 	dario.cat/mergo v1.0.2 // indirect
@@ -50,6 +50,6 @@ require (
 	github.com/stretchr/testify v1.11.1 // indirect
 	github.com/theckman/yacspin v0.13.12
 	golang.org/x/crypto v0.49.0 // indirect
-	golang.org/x/sys v0.47.0 // indirect
+	golang.org/x/sys v0.48.0 // indirect
 	golang.org/x/xerrors v0.0.0-20220907171357-04be3eba64a2 // indirect
 )
